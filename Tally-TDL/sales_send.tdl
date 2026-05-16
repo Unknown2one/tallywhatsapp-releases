@@ -1,83 +1,83 @@
 ;; ============================================================
 ;; TallyWhatsApp — Sales voucher hook
 ;;
-;; Adds a "Send WhatsApp" button (shortcut Alt+J) to the Sales
-;; voucher entry form, and fires the same flow on Form Accept so
-;; saving a voucher prompts to send.
+;; Adds a "Send WhatsApp" button (Alt+J) to the Sales voucher
+;; entry form, and fires the same flow on Form Accept so saving
+;; a voucher prompts to send.
 ;;
-;; The COM interface TallyWASend is declared in _loader.tdl —
-;; tally.ini must load _loader.tdl before this file.
+;; Idempotency key = $Guid + ":" + $$Now so every deliberate
+;; click of Alt+J / Save is treated as a fresh send. The Query
+;; Box prompt is the user's confirmation — Yes means send.
+;;
+;; Depends on _loader.tdl (declares TallyWASend COM interface).
 ;; ============================================================
 
 [#Form: Sales Color]
-    Add : Button : Send Sales WA Btn
-    On  : Form Accept : Yes : CALL : TallyWASendSales
+	Add : Button : Send Sales WA Btn
+	On  : Form Accept : Yes : CALL : TallyWASendSales
 
 [Button: Send Sales WA Btn]
-    Key    : Alt + J
-    Title  : Send WhatsApp
-    Action : Call : TallyWASendSales
+	Key    : Alt + J
+	Title  : Send WhatsApp
+	Action : Call : TallyWASendSales
 
 [Function: TallyWASendSales]
 
-    Variable: PrintFileName    :String
-    Variable: Contacts         :String
-    Variable: Exportedfilepath :String
-    Variable: ActualParty      :String
-    Variable: PartyAmount      :Amount
-    Variable: VchGuid          :String
+	Variable: PrintFileName    :String
+	Variable: Contacts         :String
+	Variable: Exportedfilepath :String
+	Variable: ActualParty      :String
+	Variable: PartyAmount      :Amount
+	Variable: VchGuid          :String
 
-    Local Formula:SafeVchNo:$$StringFindAndReplace:($$StringFindAndReplace:$VoucherNumber:"/":"-"):"\":"-"
-    Local Formula:PartyBal: $ClosingBalance:Ledger:##ActualParty
-    Local Formula:BalStr: IF $$IsEmpty:@PartyBal THEN "0.00" ELSE $$String:@PartyBal
-    Local Formula:VoucherAmtStr: $$String:##PartyAmount
-    Local Formula:LocalMsgtitle: "Namaste! Aapka Sales Invoice No. " + $VoucherNumber + " dated " + $$String:$Date + " attach kiya hai. Invoice amount " + @VoucherAmtStr + " hai. Aapka outstanding balance " + @BalStr + " hai. Dhanyavaad!"
-    Local Formula:LocalContacts: IF $$IsEmpty:($LedgerMobile:Ledger:##ActualParty) THEN "" ELSE "91" + ($LedgerMobile:Ledger:##ActualParty) + ","
+	Local Formula:SafeVchNo:$$StringFindAndReplace:($$StringFindAndReplace:$VoucherNumber:"/":"-"):"\":"-"
+	Local Formula:PartyBal: $ClosingBalance:Ledger:##ActualParty
+	Local Formula:BalStr: IF $$IsEmpty:@PartyBal THEN "0.00" ELSE $$String:@PartyBal
+	Local Formula:VoucherAmtStr: $$String:##PartyAmount
+	Local Formula:LocalMsgtitle: "Namaste! Aapka Sales Invoice No. " + $VoucherNumber + " dated " + $$String:$Date + " attach kiya hai. Invoice amount " + @VoucherAmtStr + " hai. Aapka outstanding balance " + @BalStr + " hai. Dhanyavaad!"
+	Local Formula:LocalContacts: IF $$IsEmpty:($LedgerMobile:Ledger:##ActualParty) THEN "" ELSE "91" + ($LedgerMobile:Ledger:##ActualParty) + ","
 
-    00   : SET : ActualParty : $PartyLedgerName
-    01   : SET : PartyAmount : 0
-    02   : ;; Suffix $Guid with $$Now so each deliberate click is treated as
-    03   : ;; a fresh send. The Query Box below is the user's confirmation —
-    04   : ;; if they say Yes again, they mean it.
-    05   : SET : VchGuid : $Guid + ":" + $$String:$$Now
-    06   : WALK COLLECTION : All Ledger Entries
-    07   :    If : $LedgerName = ##ActualParty
-    08   :        SET : PartyAmount : $Amount
-    09   :    End If
-    10   :    If : $$IsEmpty:##ActualParty AND NOT $$IsEmpty:($LedgerMobile:Ledger:$LedgerName)
-    11   :        SET : ActualParty : $LedgerName
-    12   :        SET : PartyAmount : $Amount
-    13   :    End If
-    14   : END WALK
-    15   : If : $$IsEmpty:##ActualParty
-    16   :    Msg Box:"TallyWhatsApp": "Party ledger not identified."
-    17   :    Return
-    18   : End If
+	00   : SET : ActualParty : $PartyLedgerName
+	01   : SET : PartyAmount : 0
+	02   : SET : VchGuid : $Guid + ":" + $$String:$$Now
+	03   : WALK COLLECTION : All Ledger Entries
+	04   :    If : $LedgerName = ##ActualParty
+	05   :        SET : PartyAmount : $Amount
+	06   :    End If
+	07   :    If : $$IsEmpty:##ActualParty AND NOT $$IsEmpty:($LedgerMobile:Ledger:$LedgerName)
+	08   :        SET : ActualParty : $LedgerName
+	09   :        SET : PartyAmount : $Amount
+	10   :    End If
+	11   : END WALK
+	12   : If : $$IsEmpty:##ActualParty
+	13   :    Msg Box:"TallyWhatsApp": "Party ledger not identified."
+	14   :    Return
+	15   : End If
 
-    19   : Query Box:"Send this sales invoice on WhatsApp?":Yes:No
-    20   : If:$$LastResult
-    21   :    If: NOT $$IsDirectory:"TallyWhatsapp"
-    22   :        Make Dir:"TallyWhatsapp"
-    23   :    End If
-    24   :    SET : Contacts :@LocalContacts
-    25   :    If:$$IsEmpty:##Contacts
-    26   :        Msg Box:"TallyWhatsApp": "No mobile number on the party ledger"
-    27   :        Return
-    28   :    End If
-    29   :    Set: SVBrowserWidth : 210
-    30   :    Set: SVBrowserHeight : 297
-    31   :    Set: SVIsPortrait : Yes
-    32   :    SET : PrintFileName : "TallyWhatsapp\Sales_" + @SafeVchNo
-    33   :    SET : SVExportFormat : $$SysName:PDF
-    34   :    SET : SVPrintFileName : $$MakeExportName:##PrintFileName:##SVExportFormat
-    35   :    SET : SVOpenFileAfterExport : No
-    36   :    EXPORT REPORT : . : Yes : Yes
-    37   :    SET : Exportedfilepath : $$GetFileFullPath:##SVPrintFileName
-    38   :    If: $$IsCOMInterfaceInvokable:TallyWASend
-    39   :        Exec COM Interface:TallyWASend:##Contacts:##Exportedfilepath:@LocalMsgtitle:"sale":##VchGuid
-    40   :        Msg Box:"WhatsApp":$$LastResult
-    41   :    Else
-    42   :        Msg Box:"TallyWhatsApp":"Service not running. Open the TallyWhatsApp app and try again."
-    43   :    End If
-    44   : End If
-    45   : Return
+	16   : Query Box:"Send this sales invoice on WhatsApp?":Yes:No
+	17   : If:$$LastResult
+	18   :    If: NOT $$IsDirectory:"TallyWhatsapp"
+	19   :        Make Dir:"TallyWhatsapp"
+	20   :    End If
+	21   :    SET : Contacts :@LocalContacts
+	22   :    If:$$IsEmpty:##Contacts
+	23   :        Msg Box:"TallyWhatsApp": "No mobile number on the party ledger"
+	24   :        Return
+	25   :    End If
+	26   :    Set: SVBrowserWidth : 210
+	27   :    Set: SVBrowserHeight : 297
+	28   :    Set: SVIsPortrait : Yes
+	29   :    SET : PrintFileName : "TallyWhatsapp\Sales_" + @SafeVchNo
+	30   :    SET : SVExportFormat : $$SysName:PDF
+	31   :    SET : SVPrintFileName : $$MakeExportName:##PrintFileName:##SVExportFormat
+	32   :    SET : SVOpenFileAfterExport : No
+	33   :    EXPORT REPORT : . : Yes : Yes
+	34   :    SET : Exportedfilepath : $$GetFileFullPath:##SVPrintFileName
+	35   :    If: $$IsCOMInterfaceInvokable:TallyWASend
+	36   :        Exec COM Interface:TallyWASend:##Contacts:##Exportedfilepath:@LocalMsgtitle:"sale":##VchGuid
+	37   :        Msg Box:"WhatsApp":$$LastResult
+	38   :    Else
+	39   :        Msg Box:"TallyWhatsApp":"Service not running. Open the TallyWhatsApp app and try again."
+	40   :    End If
+	41   : End If
+	42   : Return
