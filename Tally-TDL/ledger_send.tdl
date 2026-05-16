@@ -12,9 +12,6 @@
 [#Form: Ledger Vouchers]
     Add : Button : Send Ledger Whatsapp Btn
 
-[#Form: DSP Ledger Vouchers]
-    Add : Button : Send Ledger Whatsapp Btn
-
 [Button: Send Ledger Whatsapp Btn]
     Key    : Alt + W
     Title  : Send Ledger WA
