@@ -1,0 +1,80 @@
+;; ============================================================
+;; TallyWhatsApp — Receipt voucher hook
+;;
+;; Adds a "Send WhatsApp" button (shortcut Alt+J) to the Receipt
+;; voucher entry form, and fires the same flow on Form Accept so
+;; saving a receipt prompts to send.
+;;
+;; The COM interface TallyWASend is declared in _loader.tdl —
+;; tally.ini must load _loader.tdl before this file.
+;; ============================================================
+
+[#Form: Receipt Color]
+    Add : Button : Send Receipt WA Btn
+    On  : Form Accept : Yes : CALL : TallyWASendReceipt
+
+[Button: Send Receipt WA Btn]
+    Key    : Alt + J
+    Title  : Send WhatsApp
+    Action : Call : TallyWASendReceipt
+
+[Function: TallyWASendReceipt]
+
+    Variable: PrintFileName    :String
+    Variable: Contacts         :String
+    Variable: Exportedfilepath :String
+    Variable: ActualParty      :String
+    Variable: PartyAmount      :Amount
+    Variable: VchGuid          :String
+
+    Local Formula:SafeVchNo:$$StringFindAndReplace:($$StringFindAndReplace:$VoucherNumber:"/":"-"):"\":"-"
+    Local Formula:PartyBal: $ClosingBalance:Ledger:##ActualParty
+    Local Formula:BalStr: IF $$IsEmpty:@PartyBal THEN "0.00" ELSE $$String:@PartyBal
+    Local Formula:VoucherAmtStr: $$String:##PartyAmount
+    Local Formula:LocalMsgtitle: "Namaste! Aapka Receipt No. " + $VoucherNumber + " dated " + $$String:$Date + " attach kiya hai. Receipt amount " + @VoucherAmtStr + " hai. Aapka outstanding balance " + @BalStr + " hai. Dhanyavaad!"
+    Local Formula:LocalContacts: IF $$IsEmpty:($LedgerMobile:Ledger:##ActualParty) THEN "" ELSE "91" + ($LedgerMobile:Ledger:##ActualParty) + ","
+
+    00   : SET : ActualParty : $PartyLedgerName
+    01   : SET : PartyAmount : 0
+    02   : SET : VchGuid : $Guid
+    03   : WALK COLLECTION : All Ledger Entries
+    04   :    If : $LedgerName = ##ActualParty
+    05   :        SET : PartyAmount : $Amount
+    06   :    End If
+    07   :    If : $$IsEmpty:##ActualParty AND NOT $$IsEmpty:($LedgerMobile:Ledger:$LedgerName)
+    08   :        SET : ActualParty : $LedgerName
+    09   :        SET : PartyAmount : $Amount
+    10   :    End If
+    11   : END WALK
+    12   : If : $$IsEmpty:##ActualParty
+    13   :    Msg Box:"TallyWhatsApp": "Party ledger not identified."
+    14   :    Return
+    15   : End If
+
+    16   : Query Box:"Send this receipt on WhatsApp?":Yes:No
+    17   : If:$$LastResult
+    18   :    If: NOT $$IsDirectory:"TallyWhatsapp"
+    19   :        Make Dir:"TallyWhatsapp"
+    20   :    End If
+    21   :    SET : Contacts :@LocalContacts
+    22   :    If:$$IsEmpty:##Contacts
+    23   :        Msg Box:"TallyWhatsApp": "No mobile number on the party ledger"
+    24   :        Return
+    25   :    End If
+    26   :    Set: SVBrowserWidth : 210
+    27   :    Set: SVBrowserHeight : 297
+    28   :    Set: SVIsPortrait : Yes
+    29   :    SET : PrintFileName : "TallyWhatsapp\Receipt_" + @SafeVchNo
+    30   :    SET : SVExportFormat : $$SysName:PDF
+    31   :    SET : SVPrintFileName : $$MakeExportName:##PrintFileName:##SVExportFormat
+    32   :    SET : SVOpenFileAfterExport : No
+    33   :    EXPORT REPORT : . : Yes : Yes
+    34   :    SET : Exportedfilepath : $$GetFileFullPath:##SVPrintFileName
+    35   :    If: $$IsCOMInterfaceInvokable:TallyWASend
+    36   :        Exec COM Interface:TallyWASend:##Contacts:##Exportedfilepath:@LocalMsgtitle:"receipt":##VchGuid
+    37   :        Msg Box:"WhatsApp":$$LastResult
+    38   :    Else
+    39   :        Msg Box:"TallyWhatsApp":"Service not running. Open the TallyWhatsApp app and try again."
+    40   :    End If
+    41   : End If
+    42   : Return

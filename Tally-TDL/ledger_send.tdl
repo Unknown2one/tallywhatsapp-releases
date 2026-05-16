@@ -1,0 +1,76 @@
+;; ============================================================
+;; TallyWhatsApp — Ledger Vouchers report hook
+;;
+;; Adds a "Send Ledger WA" button (shortcut Alt+Q) to the Ledger
+;; Vouchers report. The button works in display mode so users can
+;; preview the statement before sending.
+;;
+;; The COM interface TallyWASend is declared in _loader.tdl —
+;; tally.ini must load _loader.tdl before this file.
+;; ============================================================
+
+[#Form: Ledger Vouchers]
+    Add : Button : Send Ledger Whatsapp Btn
+
+[Button: Send Ledger Whatsapp Btn]
+    Key    : Alt + Q
+    Title  : Send Ledger WA
+    Action : Call : TallyWASendLedger
+    Mode   : Display
+
+[Function: TallyWASendLedger]
+
+    Variable: PrintFileName    :String
+    Variable: Contacts         :String
+    Variable: Exportedfilepath :String
+    Variable: ActualParty      :String
+    Variable: VchGuid          :String
+
+    Local Formula:SafeLedgerName:$$StringFindAndReplace:($$StringFindAndReplace:##ActualParty:"/":"-"):"\":"-"
+    Local Formula:LedgerBal: $ClosingBalance:Ledger:##ActualParty
+    Local Formula:LedgerBalStr: IF $$IsEmpty:@LedgerBal THEN "0.00" ELSE $$String:@LedgerBal
+    Local Formula:LocalMsgtitle: "Namaste! Aapka ledger report attach kiya hai for " + ##ActualParty + ". Current closing balance " + @LedgerBalStr + " hai. Dhanyavaad!"
+    Local Formula:LocalContacts: IF $$IsEmpty:($LedgerMobile:Ledger:##ActualParty) THEN "" ELSE "91" + ($LedgerMobile:Ledger:##ActualParty) + ","
+
+    00   : SET : ActualParty : ##SVLedgerName
+    01   : If : $$IsEmpty:##ActualParty
+    02   :    SET : ActualParty : ##LedgerName
+    03   : End If
+    04   : If : $$IsEmpty:##ActualParty
+    05   :    SET : ActualParty : $Name
+    06   : End If
+    07   : If : $$IsEmpty:##ActualParty
+    08   :    Msg Box:"TallyWhatsApp":"Open Ledger Vouchers for a single party and try again."
+    09   :    Return
+    10   : End If
+    11   : Query Box:"Send the ledger statement for " + ##ActualParty + " on WhatsApp?":Yes:No
+    12   : If:$$LastResult
+    13   :    If: NOT $$IsDirectory:"TallyWhatsapp"
+    14   :        Make Dir:"TallyWhatsapp"
+    15   :    End If
+    16   :    SET : Contacts :@LocalContacts
+    17   :    If:$$IsEmpty:##Contacts
+    18   :        Msg Box:"TallyWhatsApp": "No mobile number on " + ##ActualParty
+    19   :        Return
+    20   :    End If
+    21   :    Set: SVBrowserWidth : 210
+    22   :    Set: SVBrowserHeight : 297
+    23   :    Set: SVIsPortrait : Yes
+    24   :    SET : PrintFileName : "TallyWhatsapp\Ledger_" + @SafeLedgerName
+    25   :    SET : SVExportFormat : $$SysName:PDF
+    26   :    SET : SVPrintFileName : $$MakeExportName:##PrintFileName:##SVExportFormat
+    27   :    SET : SVOpenFileAfterExport : No
+    28   :    EXPORT REPORT : . : Yes : Yes
+    29   :    SET : Exportedfilepath : $$GetFileFullPath:##SVPrintFileName
+    30   :    ;; Ledger reports don't have $Guid. Suffix the synthetic
+    31   :    ;; key with $$Now so every deliberate click is treated as a
+    32   :    ;; fresh send — the user explicitly clicked, they mean it.
+    33   :    SET : VchGuid : "ledger:" + ##ActualParty + ":" + $$String:$$Now
+    34   :    If: $$IsCOMInterfaceInvokable:TallyWASend
+    35   :        Exec COM Interface:TallyWASend:##Contacts:##Exportedfilepath:@LocalMsgtitle:"ledger":##VchGuid
+    36   :        Msg Box:"WhatsApp":$$LastResult
+    37   :    Else
+    38   :        Msg Box:"TallyWhatsApp":"Service not running. Open the TallyWhatsApp app from the system tray and try again."
+    39   :    End If
+    40   : End If
+    41   : Return

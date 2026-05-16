@@ -149,9 +149,21 @@ Write-Host "[3/4] Staging TDL files..." -ForegroundColor Yellow
 # The MSI ships only the bridge-driven TDL files. Old SalesWhatsapp /
 # ReceiptWhatsapp / LedgerWhatsapp.tdl are deliberately excluded — the
 # tally.ini patcher only adds entries for files that are actually here.
-@("voucher_send.tdl", "_loader.tdl") | ForEach-Object {
+# Voucher hooks live in three separate TDLs (sales/receipt/ledger) so each
+# can be reloaded or troubleshot independently.
+@("_loader.tdl", "sales_send.tdl", "receipt_send.tdl", "ledger_send.tdl") | ForEach-Object {
     Copy-Item (Join-Path $TDLSource $_) (Join-Path (Join-Path $BuildDir "TDL") $_) -Force
 }
+
+# ── Step 3.1: App icon ─────────────────────────────────────────────────
+Write-Host "[3.1/4] Generating app icon..." -ForegroundColor Yellow
+
+Push-Location $GoModule
+try {
+    & go run ./cmd/genicon -out (Join-Path $BuildDir "icon.ico")
+    if ($LASTEXITCODE -ne 0) { throw "genicon failed" }
+}
+finally { Pop-Location }
 
 # ── Step 4: Optional code signing ──────────────────────────────────────
 if ($Sign) {

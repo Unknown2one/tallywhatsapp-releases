@@ -14,6 +14,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -73,6 +74,7 @@ func Routes(s *State) http.Handler {
 	r.Get("/api/whatsapp/qr", s.handleWhatsAppQR)
 	r.Post("/api/whatsapp/logout", s.handleWhatsAppLogout)
 	r.Post("/api/whatsapp/reconnect", s.handleWhatsAppReconnect)
+	r.Post("/api/service/restart", s.handleServiceRestart)
 
 	// Send endpoints require an activated license. The middleware lives
 	// inline so the activation endpoint above can run unprotected.
@@ -531,6 +533,29 @@ func (s *State) handleWhatsAppReconnect(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"success": true})
+}
+
+// handleServiceRestart triggers a hard restart of the Windows service.
+// Used by the dashboard's "Restart service" fallback when a soft Reconnect
+// can't recover (stale whatsmeow state, network blip, etc).
+//
+// Implementation: respond first, then os.Exit(1) in a goroutine. Exit
+// code 1 looks like a crash to Windows SCM, which auto-restarts us via
+// the FirstFailureActionType="restart" + RestartServiceDelayInSeconds=10
+// in the MSI. Net effect: a guaranteed clean process restart in ~10 s
+// without spawning admin shells.
+func (s *State) handleServiceRestart(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]any{
+		"success":           true,
+		"restart_delay_sec": 10,
+		"message":           "Service is restarting. Reload the page in 10–15 seconds.",
+	})
+	// Schedule the exit on a goroutine so the response actually flushes.
+	go func() {
+		time.Sleep(800 * time.Millisecond)
+		s.Logger.Warn("service: hard restart requested via API")
+		os.Exit(1)
+	}()
 }
 
 // --------- helpers ---------

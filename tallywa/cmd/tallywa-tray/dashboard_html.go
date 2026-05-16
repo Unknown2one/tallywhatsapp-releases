@@ -179,9 +179,35 @@ const dashboardHTML = `<!doctype html>
   .qr-tile {
     background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
     padding: 12px; display:flex; flex-direction:column; align-items:center; gap: 8px;
+    width: 244px;
   }
   .qr-tile img { width: 220px; height: 220px; image-rendering: pixelated; display:block; }
+  .qr-tile img:not([src]), .qr-tile img[src=""] { display: none; }
   .qr-tile .small { font-size: 11.5px; color: var(--ink-500); }
+  /* Loading skeleton — shown while whatsmeow opens the QR channel.
+     Replaced by the QR <img> as soon as the first code arrives. */
+  .qr-skeleton {
+    width: 220px; height: 220px;
+    border-radius: 10px;
+    background:
+      linear-gradient(135deg, transparent 24%, rgba(37,211,102,.06) 25%, rgba(37,211,102,.06) 75%, transparent 76%),
+      linear-gradient(45deg,  transparent 24%, rgba(37,211,102,.06) 25%, rgba(37,211,102,.06) 75%, transparent 76%),
+      #f7f8fa;
+    background-size: 22px 22px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 12px;
+    color: var(--ink-500);
+  }
+  .qr-skeleton.hidden { display: none; }
+  .qr-spinner {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 3px solid rgba(37,211,102,.18);
+    border-top-color: var(--green-500, #25d366);
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .qr-skeleton .lbl { font-size: 12px; font-weight: 500; }
   .help ol { padding-left: 20px; color: var(--ink-700); margin: 6px 0 12px; }
   .help li { margin: 4px 0; }
   .help .privnote { color: var(--ink-500); font-size: 12.5px; }
@@ -277,7 +303,11 @@ const dashboardHTML = `<!doctype html>
       <div id="qrPanel" hidden style="margin-top:16px;">
         <div class="qr-box">
           <div class="qr-tile">
-            <img id="qrImg" alt="WhatsApp pairing QR">
+            <div id="qrSkeleton" class="qr-skeleton">
+              <div class="qr-spinner" aria-hidden="true"></div>
+              <div class="lbl">Preparing QR…</div>
+            </div>
+            <img id="qrImg" alt="" hidden>
             <div class="small">Scan with your phone</div>
           </div>
           <div class="help" style="flex:1;">
@@ -398,7 +428,21 @@ async function refreshQR() {
     const j = await r.json();
     if (j.qr && j.qr !== qrCache) {
       qrCache = j.qr;
-      $("qrImg").src = j.qr;
+      const img = $("qrImg");
+      const skel = $("qrSkeleton");
+      img.src = j.qr;
+      img.alt = "WhatsApp pairing QR";
+      img.hidden = false;
+      if (skel) skel.classList.add("hidden");
+    } else if (!j.qr) {
+      // Service is in awaiting_qr but whatsmeow hasn't pushed the first code
+      // yet — keep the skeleton up, hide any stale image.
+      const img = $("qrImg");
+      const skel = $("qrSkeleton");
+      img.hidden = true;
+      img.removeAttribute("src");
+      qrCache = "";
+      if (skel) skel.classList.remove("hidden");
     }
   } catch (e) { /* ignore */ }
 }
@@ -690,21 +734,60 @@ $("logoutBtn").addEventListener("click", async () => {
 $("reconnectBtn").addEventListener("click", async () => {
   $("reconnectBtn").disabled = true;
   $("reconnectBtn").textContent = "Reconnecting…";
+  // Surface the QR skeleton up-front so the user sees movement.
+  const skel = $("qrSkeleton");
+  if (skel) skel.classList.remove("hidden");
+  $("qrImg").hidden = true;
+  $("qrImg").removeAttribute("src");
+  qrCache = "";
+
   try {
     const r = await fetch("/proxy/api/whatsapp/reconnect", {method: "POST"});
-    if (r.ok) {
-      toast("Loading new QR…");
-      refreshStatus();
-    } else {
-      toast("Reconnect failed. Check your internet.");
+    if (!r.ok) {
+      // Soft reconnect refused — go straight to hard restart.
+      await hardRestart();
+      return;
     }
+    toast("Reconnecting…");
+
+    // Watchdog: if 7s elapse and we still have no QR while state is
+    // awaiting_qr, the in-process re-arm didn't take. Fall back to a
+    // full service restart, which Windows SCM auto-revives in ~10s.
+    setTimeout(async () => {
+      try {
+        const sr = await fetch("/status");
+        const s = await sr.json();
+        const stillStuck = s.reachable && s.whatsapp_state === "awaiting_qr" && !qrCache;
+        if (stillStuck) {
+          await hardRestart();
+        }
+      } catch { /* ignore */ }
+    }, 7000);
   } catch (e) {
     toast("Reconnect failed: " + e.message);
   } finally {
-    $("reconnectBtn").disabled = false;
-    $("reconnectBtn").textContent = "Reconnect";
+    setTimeout(() => {
+      $("reconnectBtn").disabled = false;
+      $("reconnectBtn").textContent = "Reconnect";
+    }, 1500);
   }
 });
+
+// hardRestart asks the service to exit; Windows SCM brings it back in
+// ~10 seconds via the failure-restart action defined in the MSI.
+async function hardRestart() {
+  toast("Restarting service — refresh in ~15 seconds.");
+  try {
+    await fetch("/proxy/api/service/restart", {method: "POST"});
+  } catch { /* the service exits before flushing the response — expected */ }
+  // Surface a more visible banner so the user knows to wait.
+  const skel = $("qrSkeleton");
+  if (skel) {
+    skel.querySelector(".lbl").textContent = "Service restarting…";
+  }
+  // Reload the page after 15s — by then SCM has revived us.
+  setTimeout(() => location.reload(), 15000);
+}
 
 $("howBtn").addEventListener("click", () => {
   alert("Your activation key was emailed to you after purchase. It looks like TWA-XXXX-XXXX-XXXX. If you can't find it, check spam or email admin@variantstudio.in.");

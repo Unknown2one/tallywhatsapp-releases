@@ -59,7 +59,13 @@
       <ComponentGroupRef Id="TDLComponents" />
       <ComponentRef Id="TrayAutostartComponent" />
       <ComponentRef Id="ProgramMenuShortcutsComponent" />
+      <ComponentRef Id="DesktopShortcutComponent" />
     </Feature>
+
+    <!-- App icon for shortcuts and Add/Remove Programs. The .ico file is
+         generated at build time by tallywa/cmd/genicon. -->
+    <Icon Id="AppIcon.exe" SourceFile="$(BuildDir)\icon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.exe" />
 
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLDIR" Name="$(ProductName)">
@@ -70,6 +76,8 @@
     <StandardDirectory Id="ProgramMenuFolder">
       <Directory Id="ProductProgramMenuFolder" Name="$(ProductName)" />
     </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
 
     <!-- Properties wired to custom-action arguments. -->
     <SetProperty Id="PatchTallyIni"
@@ -280,8 +288,14 @@
       <Component Id="TDLLoader" Guid="*">
         <File Id="TDLLoader" Source="$(BuildDir)\TDL\_loader.tdl" KeyPath="yes" />
       </Component>
-      <Component Id="TDLVoucherSend" Guid="*">
-        <File Id="TDLVoucherSend" Source="$(BuildDir)\TDL\voucher_send.tdl" KeyPath="yes" />
+      <Component Id="TDLSalesSend" Guid="*">
+        <File Id="TDLSalesSend" Source="$(BuildDir)\TDL\sales_send.tdl" KeyPath="yes" />
+      </Component>
+      <Component Id="TDLReceiptSend" Guid="*">
+        <File Id="TDLReceiptSend" Source="$(BuildDir)\TDL\receipt_send.tdl" KeyPath="yes" />
+      </Component>
+      <Component Id="TDLLedgerSend" Guid="*">
+        <File Id="TDLLedgerSend" Source="$(BuildDir)\TDL\ledger_send.tdl" KeyPath="yes" />
       </Component>
     </ComponentGroup>
 
@@ -306,10 +320,12 @@
                Directory="ProductProgramMenuFolder"
                Guid="*">
       <Shortcut Id="OpenDashboardShortcut"
-                Name="Open TallyWhatsApp"
+                Name="TallyWhatsApp"
                 Description="Opens the TallyWhatsApp dashboard"
                 Target="[INSTALLDIR]tallywa-tray.exe"
-                WorkingDirectory="INSTALLDIR" />
+                WorkingDirectory="INSTALLDIR"
+                Icon="AppIcon.exe"
+                IconIndex="0" />
       <Shortcut Id="UninstallShortcut"
                 Name="Uninstall TallyWhatsApp"
                 Description="Removes TallyWhatsApp"
@@ -319,6 +335,28 @@
       <RegistryValue Root="HKCU"
                      Key="Software\TallyWhatsApp"
                      Name="ShortcutsInstalled"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+    </Component>
+
+    <!-- Desktop shortcut. Separate component so users can delete it
+         without breaking the Start Menu entry. The HKCU registry value is
+         the keypath; if the user removes the .lnk it'll be restored on
+         next "Repair" or upgrade install. -->
+    <Component Id="DesktopShortcutComponent"
+               Directory="DesktopFolder"
+               Guid="*">
+      <Shortcut Id="DesktopDashboardShortcut"
+                Name="TallyWhatsApp"
+                Description="Opens the TallyWhatsApp dashboard"
+                Target="[INSTALLDIR]tallywa-tray.exe"
+                WorkingDirectory="INSTALLDIR"
+                Icon="AppIcon.exe"
+                IconIndex="0" />
+      <RegistryValue Root="HKCU"
+                     Key="Software\TallyWhatsApp"
+                     Name="DesktopShortcutInstalled"
                      Type="integer"
                      Value="1"
                      KeyPath="yes" />
