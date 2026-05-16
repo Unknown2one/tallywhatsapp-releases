@@ -204,45 +204,65 @@ func (c *MeowClient) Logout(ctx context.Context) error {
 }
 
 // Reconnect tears down any in-flight pairing state and arms a fresh QR
-// channel. Idempotent; safe to call when already connected (no-op) and
-// when not connected (re-pairs). The caller passes a long-lived context
-// — we don't bind goroutines to the request ctx because the QR consumer
-// has to outlive the HTTP request.
+// channel. Idempotent; safe to call when already connected (no-op apart
+// from a brief socket bounce) and when not connected (re-pairs).
+//
+// After Logout, whatsmeow has dropped the device row from the store DB
+// but the in-memory *store.Device still carries the old ID. Re-using
+// that device for pairing fails silently (whatsmeow tries to resume the
+// dead session). The fix is to fetch a fresh device from the container
+// and rebuild the *whatsmeow.Client. We do this every Reconnect, even
+// when the previous session was healthy — costs a few ms, eliminates a
+// whole class of "stuck on awaiting_qr with no QR" bugs.
 func (c *MeowClient) Reconnect(_ context.Context) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	// Stop the previous QR consumer (if any) and drop the existing socket.
-	// whatsmeow's auto-reconnect is fine when paired, but we want a clean
-	// state machine when re-pairing — fresh QR channel, no half-alive
-	// goroutines from the previous session.
+	// 1. Tear down the previous goroutines + socket. After this point
+	// no event handler from the old client can mutate our state.
 	if c.cancelFn != nil {
 		c.cancelFn()
 		c.cancelFn = nil
 	}
-	if c.device.IsConnected() {
+	if c.device != nil && c.device.IsConnected() {
 		c.device.Disconnect()
 	}
 	c.wg.Wait()
 
+	// 2. Pull a fresh device out of the store. After Logout the store
+	// is empty, so GetFirstDevice returns sql.ErrNoRows — that's the
+	// signal to mint a new pairing-ready device.
+	deviceStore, err := c.dbContainer.GetFirstDevice(context.Background())
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("whatsapp: get device on reconnect: %w", err)
+	}
+	if deviceStore == nil {
+		deviceStore = c.dbContainer.NewDevice()
+	}
+
+	// 3. Build a fresh whatsmeow client around the device. Re-binding
+	// the event handler is mandatory — it's per-client, not per-store.
+	clientLogger := waLog.Stdout("WAClient", "WARN", true)
+	c.device = whatsmeow.NewClient(deviceStore, clientLogger)
+	if c.device == nil {
+		return errors.New("whatsapp: rebuild client failed")
+	}
+	c.device.AddEventHandler(c.handleEvent)
+
+	// 4. Arm the QR pump if unpaired, else just dial.
 	runCtx, cancel := context.WithCancel(context.Background())
 	c.cancelFn = cancel
-
 	if c.device.Store.ID == nil {
-		// Unpaired — usual case after Logout. Open a new QR channel
-		// before Connect so we never miss the first QR push.
 		qrChan, err := c.device.GetQRChannel(runCtx)
 		if err != nil {
 			cancel()
 			c.cancelFn = nil
-			return fmt.Errorf("whatsapp: get qr channel: %w", err)
+			return fmt.Errorf("whatsapp: get qr channel on reconnect: %w", err)
 		}
 		c.state.Store(StateAwaitingQR)
 		c.wg.Add(1)
 		go c.consumeQRChannel(qrChan)
 	} else {
-		// Still paired — caller hit Reconnect without logging out.
-		// Just dial.
 		c.state.Store(StateConnecting)
 	}
 
@@ -250,7 +270,7 @@ func (c *MeowClient) Reconnect(_ context.Context) error {
 		cancel()
 		c.cancelFn = nil
 		c.state.Store(StateDisconnected)
-		return fmt.Errorf("whatsapp: connect: %w", err)
+		return fmt.Errorf("whatsapp: connect on reconnect: %w", err)
 	}
 	return nil
 }
