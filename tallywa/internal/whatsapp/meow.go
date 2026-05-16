@@ -189,7 +189,8 @@ func (c *MeowClient) Close() error {
 }
 
 // Logout tells WhatsApp to forget this device. Used by the tray UI's
-// "re-pair from a different phone" flow.
+// "re-pair from a different phone" flow. The HTTP handler chases this
+// with Reconnect so the user gets a fresh QR without restarting.
 func (c *MeowClient) Logout(ctx context.Context) error {
 	if c.device == nil {
 		return nil
@@ -199,6 +200,58 @@ func (c *MeowClient) Logout(ctx context.Context) error {
 	}
 	c.state.Store(StateLoggedOut)
 	c.qr.Store("")
+	return nil
+}
+
+// Reconnect tears down any in-flight pairing state and arms a fresh QR
+// channel. Idempotent; safe to call when already connected (no-op) and
+// when not connected (re-pairs). The caller passes a long-lived context
+// — we don't bind goroutines to the request ctx because the QR consumer
+// has to outlive the HTTP request.
+func (c *MeowClient) Reconnect(_ context.Context) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	// Stop the previous QR consumer (if any) and drop the existing socket.
+	// whatsmeow's auto-reconnect is fine when paired, but we want a clean
+	// state machine when re-pairing — fresh QR channel, no half-alive
+	// goroutines from the previous session.
+	if c.cancelFn != nil {
+		c.cancelFn()
+		c.cancelFn = nil
+	}
+	if c.device.IsConnected() {
+		c.device.Disconnect()
+	}
+	c.wg.Wait()
+
+	runCtx, cancel := context.WithCancel(context.Background())
+	c.cancelFn = cancel
+
+	if c.device.Store.ID == nil {
+		// Unpaired — usual case after Logout. Open a new QR channel
+		// before Connect so we never miss the first QR push.
+		qrChan, err := c.device.GetQRChannel(runCtx)
+		if err != nil {
+			cancel()
+			c.cancelFn = nil
+			return fmt.Errorf("whatsapp: get qr channel: %w", err)
+		}
+		c.state.Store(StateAwaitingQR)
+		c.wg.Add(1)
+		go c.consumeQRChannel(qrChan)
+	} else {
+		// Still paired — caller hit Reconnect without logging out.
+		// Just dial.
+		c.state.Store(StateConnecting)
+	}
+
+	if err := c.device.Connect(); err != nil {
+		cancel()
+		c.cancelFn = nil
+		c.state.Store(StateDisconnected)
+		return fmt.Errorf("whatsapp: connect: %w", err)
+	}
 	return nil
 }
 

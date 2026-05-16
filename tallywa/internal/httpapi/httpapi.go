@@ -72,6 +72,7 @@ func Routes(s *State) http.Handler {
 	// license, or vice versa, in either order.
 	r.Get("/api/whatsapp/qr", s.handleWhatsAppQR)
 	r.Post("/api/whatsapp/logout", s.handleWhatsAppLogout)
+	r.Post("/api/whatsapp/reconnect", s.handleWhatsAppReconnect)
 
 	// Send endpoints require an activated license. The middleware lives
 	// inline so the activation endpoint above can run unprotected.
@@ -496,7 +497,8 @@ func (s *State) handleWhatsAppQR(w http.ResponseWriter, _ *http.Request) {
 
 // handleWhatsAppLogout asks WhatsApp to forget this device. Used when
 // the customer wants to switch to a different phone or hands their PC
-// to someone else. The next start will surface a fresh QR.
+// to someone else. We immediately re-arm a fresh QR channel so the
+// dashboard surfaces the new QR without a service restart.
 func (s *State) handleWhatsAppLogout(w http.ResponseWriter, r *http.Request) {
 	lc, ok := s.Client.(whatsapp.LifecycleClient)
 	if !ok {
@@ -504,6 +506,27 @@ func (s *State) handleWhatsAppLogout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := lc.Logout(r.Context()); err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	// Best-effort re-arm. If reconnect fails (e.g. offline), the dashboard
+	// "Reconnect" button gives the user a manual retry.
+	if err := lc.Reconnect(r.Context()); err != nil {
+		s.Logger.Warn("post-logout reconnect failed", "err", err)
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"success": true})
+}
+
+// handleWhatsAppReconnect re-arms the WhatsApp socket / QR channel.
+// Surfaced via a dashboard button for users stuck in logged_out after a
+// previous logout where the auto-reconnect didn't catch.
+func (s *State) handleWhatsAppReconnect(w http.ResponseWriter, r *http.Request) {
+	lc, ok := s.Client.(whatsapp.LifecycleClient)
+	if !ok {
+		writeError(w, http.StatusServiceUnavailable, "lifecycle not supported by current client")
+		return
+	}
+	if err := lc.Reconnect(r.Context()); err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}

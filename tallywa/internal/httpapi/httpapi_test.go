@@ -488,8 +488,26 @@ func TestWhatsAppLogout_DisconnectsAndUnsetsPhone(t *testing.T) {
 	if stub.Connected() {
 		t.Errorf("stub should be disconnected after logout")
 	}
-	if stub.State() != whatsapp.StateLoggedOut {
-		t.Errorf("state = %v, want logged_out", stub.State())
+	// Logout immediately re-arms the QR channel so the user can rescan
+	// without restarting the service. The transient logged_out → awaiting_qr
+	// transition happens server-side; tests observe the post-rearm state.
+	if stub.State() != whatsapp.StateAwaitingQR {
+		t.Errorf("state = %v, want awaiting_qr (logout auto-rearms)", stub.State())
+	}
+}
+
+func TestWhatsAppReconnect_RearmsQRChannel(t *testing.T) {
+	s := newTestState(t)
+	stub := s.Client.(*whatsapp.StubClient)
+	stub.SetConnected(false)
+	stub.SetState(whatsapp.StateLoggedOut)
+
+	rr := do(t, Routes(s), "POST", "/api/whatsapp/reconnect", nil)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("status = %d body=%s", rr.Code, rr.Body.String())
+	}
+	if stub.State() != whatsapp.StateAwaitingQR {
+		t.Errorf("state = %v, want awaiting_qr after reconnect", stub.State())
 	}
 }
 

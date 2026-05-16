@@ -43,9 +43,12 @@ type LifecycleClient interface {
 	State() State
 	// QR returns the current pending pairing QR string, "" if none.
 	QR() string
-	// Logout asks WhatsApp to forget this device. Caller must Start()
-	// again to re-pair.
+	// Logout asks WhatsApp to forget this device. Caller must Reconnect
+	// (or restart the service) to re-pair.
 	Logout(ctx context.Context) error
+	// Reconnect re-arms the QR channel after a Logout, or re-dials the
+	// socket when the previous session went stale. Idempotent.
+	Reconnect(ctx context.Context) error
 }
 
 // Sender adapts a Client to the outbox.Sender interface. Splitting Kind
@@ -171,6 +174,15 @@ func (s *StubClient) Logout(_ context.Context) error {
 	s.phone = ""
 	s.state = StateLoggedOut
 	s.qr = ""
+	return nil
+}
+
+// Reconnect implements LifecycleClient. Re-arms the awaiting-QR state
+// so tests can drive the post-logout repair flow.
+func (s *StubClient) Reconnect(_ context.Context) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.state = StateAwaitingQR
 	return nil
 }
 

@@ -294,6 +294,7 @@ const dashboardHTML = `<!doctype html>
 
       <div id="connectedPanel" hidden style="margin-top:14px;">
         <button class="secondary" id="logoutBtn">Log out of WhatsApp</button>
+        <button id="reconnectBtn" hidden>Reconnect</button>
       </div>
     </div>
 
@@ -593,6 +594,8 @@ function paint(s) {
       $("waPhone").textContent = s.whatsapp_phone ? "+" + s.whatsapp_phone : "";
       $("qrPanel").hidden = true;
       $("connectedPanel").hidden = false;
+      $("logoutBtn").hidden = false;
+      $("reconnectBtn").hidden = true;
       break;
     case "awaiting_qr":
       setBadge($("waBadge"), "warn", "scan QR");
@@ -604,10 +607,12 @@ function paint(s) {
       break;
     case "logged_out":
       setBadge($("waBadge"), "err", "logged out");
-      $("waLabel").textContent = "Logged out. Restart to scan again.";
+      $("waLabel").textContent = "Logged out. Click Reconnect to scan a new QR.";
       $("waPhone").hidden = true;
       $("qrPanel").hidden = true;
-      $("connectedPanel").hidden = true;
+      $("connectedPanel").hidden = false;
+      $("logoutBtn").hidden = true;
+      $("reconnectBtn").hidden = false;
       break;
     case "connecting":
     case "disconnected":
@@ -672,13 +677,32 @@ $("logoutBtn").addEventListener("click", async () => {
   try {
     const r = await fetch("/proxy/api/whatsapp/logout", {method: "POST"});
     if (r.ok) {
-      toast("Logged out.");
+      toast("Logged out. Loading new QR…");
       refreshStatus();
     } else {
       toast("Logout failed.");
     }
   } catch (e) {
     toast("Logout failed: " + e.message);
+  }
+});
+
+$("reconnectBtn").addEventListener("click", async () => {
+  $("reconnectBtn").disabled = true;
+  $("reconnectBtn").textContent = "Reconnecting…";
+  try {
+    const r = await fetch("/proxy/api/whatsapp/reconnect", {method: "POST"});
+    if (r.ok) {
+      toast("Loading new QR…");
+      refreshStatus();
+    } else {
+      toast("Reconnect failed. Check your internet.");
+    }
+  } catch (e) {
+    toast("Reconnect failed: " + e.message);
+  } finally {
+    $("reconnectBtn").disabled = false;
+    $("reconnectBtn").textContent = "Reconnect";
   }
 });
 
