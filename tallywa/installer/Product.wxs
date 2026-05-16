@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TallyWhatsApp MSI installer.
+
+  Behaviour:
+    * Installs per-machine to "%ProgramFiles%\TallyWhatsApp".
+    * Lays down tallywa-svc.exe, tallywa-tray.exe, tallywa-installer-helper.exe,
+      the C# COM DLL, and the TDL files.
+    * Registers TallyWhatsAppConnector as a Windows service (auto-start,
+      restart on failure).
+    * Registers the C# DLL for COM via regasm in 32- and 64-bit views so
+      Tally.exe (32-bit) and TallyPrime (64-bit) can both call it.
+    * Patches every detected tally.ini to load our TDL files.
+    * Adds the tray to the user's Run key so it starts at next logon.
+    * On uninstall, reverses each of the above.
+
+  Authoring notes:
+    * Targets WiX v4. Build with `wix build`.
+    * Property values like Manufacturer / Version / DLLs come from the
+      build script via -d switches; defaults below are dev-friendly.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util"
+     xmlns:fw="http://wixtoolset.org/schemas/v4/wxs/firewall">
+
+  <?define ProductName    = "TallyWhatsApp" ?>
+  <?define Manufacturer   = "TallyWhatsApp" ?>
+  <?define UpgradeCode    = "B7E2E3F0-1A2C-4F7B-8C1D-1F0E2D3C4B5A" ?>
+  <?ifndef ProductVersion ?>
+    <?define ProductVersion = "1.0.0" ?>
+  <?endif?>
+  <?ifndef BuildDir ?>
+    <?define BuildDir = "build" ?>
+  <?endif?>
+
+  <Package
+      Name="$(ProductName)"
+      Manufacturer="$(Manufacturer)"
+      Version="$(ProductVersion)"
+      UpgradeCode="$(UpgradeCode)"
+      InstallerVersion="500"
+      Compressed="yes"
+      Scope="perMachine">
+
+    <SummaryInformation Description="$(ProductName) installer" />
+
+    <!-- Forbid downgrades. Major-upgrade replaces the old install in-place. -->
+    <MajorUpgrade
+        DowngradeErrorMessage="A newer version of $(ProductName) is already installed."
+        Schedule="afterInstallInitialize" />
+
+    <Media Id="1" Cabinet="tallywa.cab" EmbedCab="yes" />
+
+    <!-- Single feature so the user can't deselect anything. The product
+         only works with all four pieces installed; offering an "advanced"
+         tree is just a footgun for non-technical buyers. -->
+    <Feature Id="MainFeature" Title="$(ProductName)" Level="1" AllowAbsent="no">
+      <ComponentGroupRef Id="ApplicationComponents" />
+      <ComponentGroupRef Id="TDLComponents" />
+      <ComponentRef Id="TrayAutostartComponent" />
+      <ComponentRef Id="ProgramMenuShortcutsComponent" />
+    </Feature>
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLDIR" Name="$(ProductName)">
+        <Directory Id="TDLDIR" Name="TDL" />
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ProductProgramMenuFolder" Name="$(ProductName)" />
+    </StandardDirectory>
+
+    <!-- Properties wired to custom-action arguments. -->
+    <SetProperty Id="PatchTallyIni"
+                 Value="&quot;[INSTALLDIR]tallywa-installer-helper.exe&quot; patch-tally-ini --tdl-dir &quot;[TDLDIR]&quot;"
+                 Before="PatchTallyIni"
+                 Sequence="execute" />
+    <SetProperty Id="UnpatchTallyIni"
+                 Value="&quot;[INSTALLDIR]tallywa-installer-helper.exe&quot; unpatch-tally-ini --tdl-dir &quot;[TDLDIR]&quot;"
+                 Before="UnpatchTallyIni"
+                 Sequence="execute" />
+    <!-- Scheduled task: run the updater once a day. We use schtasks.exe
+         instead of a WiX scheduled-task extension because the latter has
+         a chequered history across WiX versions and schtasks.exe is
+         present on every Windows release we target. -->
+    <SetProperty Id="InstallUpdaterTask"
+                 Value="&quot;[System64Folder]schtasks.exe&quot; /Create /F /SC DAILY /ST 03:17 /RL HIGHEST /RU SYSTEM /TN &quot;TallyWhatsAppUpdater&quot; /TR &quot;\&quot;[INSTALLDIR]tallywa-updater.exe\&quot;&quot;"
+                 Before="InstallUpdaterTask"
+                 Sequence="execute" />
+    <SetProperty Id="RemoveUpdaterTask"
+                 Value="&quot;[System64Folder]schtasks.exe&quot; /Delete /F /TN &quot;TallyWhatsAppUpdater&quot;"
+                 Before="RemoveUpdaterTask"
+                 Sequence="execute" />
+    <SetProperty Id="RegisterCom64"
+                 Value="&quot;[WindowsFolder]Microsoft.NET\Framework64\v4.0.30319\regasm.exe&quot; &quot;[#WhatsAppDll]&quot; /codebase /tlb"
+                 Before="RegisterCom64"
+                 Sequence="execute" />
+    <SetProperty Id="RegisterCom32"
+                 Value="&quot;[WindowsFolder]Microsoft.NET\Framework\v4.0.30319\regasm.exe&quot; &quot;[#WhatsAppDll]&quot; /codebase /tlb"
+                 Before="RegisterCom32"
+                 Sequence="execute" />
+    <SetProperty Id="UnregisterCom64"
+                 Value="&quot;[WindowsFolder]Microsoft.NET\Framework64\v4.0.30319\regasm.exe&quot; &quot;[#WhatsAppDll]&quot; /unregister /silent"
+                 Before="UnregisterCom64"
+                 Sequence="execute" />
+    <SetProperty Id="UnregisterCom32"
+                 Value="&quot;[WindowsFolder]Microsoft.NET\Framework\v4.0.30319\regasm.exe&quot; &quot;[#WhatsAppDll]&quot; /unregister /silent"
+                 Before="UnregisterCom32"
+                 Sequence="execute" />
+
+    <!-- regasm is shipped with the .NET Framework, which has been
+         present on every Windows release since 7. We don't ship it.
+         Path is inlined into each SetProperty above because plain
+         <Property> values aren't formatted at install time. -->
+
+    <CustomAction Id="PatchTallyIni"
+                  BinaryRef="Wix4UtilCA_X64"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="ignore"
+                  Impersonate="no" />
+
+    <CustomAction Id="UnpatchTallyIni"
+                  BinaryRef="Wix4UtilCA_X64"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="ignore"
+                  Impersonate="no" />
+
+    <CustomAction Id="RegisterCom64"
+                  BinaryRef="Wix4UtilCA_X64"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="check"
+                  Impersonate="no" />
+    <CustomAction Id="RegisterCom32"
+                  BinaryRef="Wix4UtilCA_X64"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="ignore"
+                  Impersonate="no" />
+    <CustomAction Id="UnregisterCom64"
+                  BinaryRef="Wix4UtilCA_X64"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="ignore"
+                  Impersonate="no" />
+    <CustomAction Id="UnregisterCom32"
+                  BinaryRef="Wix4UtilCA_X64"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="ignore"
+                  Impersonate="no" />
+
+    <CustomAction Id="InstallUpdaterTask"
+                  BinaryRef="Wix4UtilCA_X64"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="ignore"
+                  Impersonate="no" />
+    <CustomAction Id="RemoveUpdaterTask"
+                  BinaryRef="Wix4UtilCA_X64"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="ignore"
+                  Impersonate="no" />
+
+    <InstallExecuteSequence>
+      <!-- Order matters. On install we register COM after files are laid
+           down, then patch tally.ini. On uninstall we reverse: unpatch
+           first (so Tally never tries to load a TDL pointing at a deleted
+           DLL), then unregister COM, then RemoveFiles. -->
+      <Custom Action="UnpatchTallyIni"
+              Before="UnregisterCom64"
+              Condition="(REMOVE=&quot;ALL&quot;) AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="UnregisterCom64"
+              Before="UnregisterCom32"
+              Condition="(REMOVE=&quot;ALL&quot;) AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="UnregisterCom32"
+              Before="RemoveFiles"
+              Condition="(REMOVE=&quot;ALL&quot;) AND NOT UPGRADINGPRODUCTCODE" />
+
+      <Custom Action="RegisterCom64"
+              After="InstallFiles"
+              Condition="NOT REMOVE" />
+      <Custom Action="RegisterCom32"
+              After="RegisterCom64"
+              Condition="NOT REMOVE" />
+      <Custom Action="PatchTallyIni"
+              After="RegisterCom32"
+              Condition="NOT REMOVE" />
+      <Custom Action="InstallUpdaterTask"
+              After="PatchTallyIni"
+              Condition="NOT REMOVE" />
+      <Custom Action="RemoveUpdaterTask"
+              Before="UnpatchTallyIni"
+              Condition="(REMOVE=&quot;ALL&quot;) AND NOT UPGRADINGPRODUCTCODE" />
+
+      <!-- Stop the service before we touch anything; ServiceControl
+           below handles install/uninstall, but this Custom action ensures
+           the binary isn't held open during file replacement on upgrade. -->
+    </InstallExecuteSequence>
+
+    <ComponentGroup Id="ApplicationComponents" Directory="INSTALLDIR">
+      <!-- The service exe and the ServiceInstall live on the same
+           component so MSI treats them as one unit: one File row, one
+           ServiceInstall row keyed off it. Splitting them is a classic
+           WiX double-install footgun. -->
+      <Component Id="ServiceComponent" Guid="A4F6CDE1-2B30-4E2C-9F1B-6D3A8C2E4F7A">
+        <File Id="ServiceExe"
+              Source="$(BuildDir)\tallywa-svc.exe"
+              KeyPath="yes" />
+        <ServiceInstall
+            Id="TallyWhatsAppConnector"
+            Name="TallyWhatsAppConnector"
+            DisplayName="TallyWhatsApp Connector"
+            Description="Local bridge between TallyPrime and WhatsApp Multi-Device. All processing stays on this PC."
+            Type="ownProcess"
+            Start="auto"
+            ErrorControl="normal"
+            Account="LocalSystem"
+            Vital="yes">
+          <util:ServiceConfig
+              FirstFailureActionType="restart"
+              SecondFailureActionType="restart"
+              ThirdFailureActionType="restart"
+              RestartServiceDelayInSeconds="10" />
+        </ServiceInstall>
+        <ServiceControl
+            Id="StartService"
+            Name="TallyWhatsAppConnector"
+            Start="install"
+            Stop="both"
+            Remove="uninstall"
+            Wait="yes" />
+        <fw:FirewallException
+            Id="ServiceLoopback"
+            Name="$(ProductName) Connector"
+            Scope="localSubnet"
+            IgnoreFailure="yes" />
+      </Component>
+
+      <Component Id="TrayExe" Guid="*">
+        <File Id="TrayExe"
+              Source="$(BuildDir)\tallywa-tray.exe"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="HelperExe" Guid="*">
+        <File Id="HelperExe"
+              Source="$(BuildDir)\tallywa-installer-helper.exe"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="UpdaterExe" Guid="*">
+        <File Id="UpdaterExe"
+              Source="$(BuildDir)\tallywa-updater.exe"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="WhatsAppDllComponent" Guid="*">
+        <File Id="WhatsAppDll"
+              Source="$(BuildDir)\TallyWhatsappsender.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="LicensePublicKeyMarker" Guid="*">
+        <!-- HKLM marker so support staff can confirm a successful install
+             from outside Tally. The service writes Port/Secret/Version
+             at runtime; this is just the install pointer. -->
+        <RegistryKey Root="HKLM" Key="SOFTWARE\TallyWhatsApp">
+          <RegistryValue Name="InstallDir" Type="string" Value="[INSTALLDIR]" KeyPath="yes" />
+          <RegistryValue Name="InstalledVersion" Type="string" Value="$(ProductVersion)" />
+        </RegistryKey>
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="TDLComponents" Directory="TDLDIR">
+      <Component Id="TDLLoader" Guid="*">
+        <File Id="TDLLoader" Source="$(BuildDir)\TDL\_loader.tdl" KeyPath="yes" />
+      </Component>
+      <Component Id="TDLVoucherSend" Guid="*">
+        <File Id="TDLVoucherSend" Source="$(BuildDir)\TDL\voucher_send.tdl" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <!-- Service registration is now embedded inside the ServiceComponent
+         in ApplicationComponents above. -->
+
+    <!-- Tray autostart. HKCU under "[~]" expands at install time to the
+         first user; for multi-user laptops we rely on the tray's own
+         autostart toggle to register HKCU on first run. -->
+    <Component Id="TrayAutostartComponent"
+               Directory="INSTALLDIR"
+               Guid="C8D7B6A5-4938-4221-BD7C-9E1F2A3B4C5D">
+      <RegistryKey Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\Run">
+        <RegistryValue Name="TallyWhatsApp"
+                       Type="string"
+                       Value="&quot;[INSTALLDIR]tallywa-tray.exe&quot;"
+                       KeyPath="yes" />
+      </RegistryKey>
+    </Component>
+
+    <Component Id="ProgramMenuShortcutsComponent"
+               Directory="ProductProgramMenuFolder"
+               Guid="*">
+      <Shortcut Id="OpenDashboardShortcut"
+                Name="Open TallyWhatsApp"
+                Description="Opens the TallyWhatsApp dashboard"
+                Target="[INSTALLDIR]tallywa-tray.exe"
+                WorkingDirectory="INSTALLDIR" />
+      <Shortcut Id="UninstallShortcut"
+                Name="Uninstall TallyWhatsApp"
+                Description="Removes TallyWhatsApp"
+                Target="[System64Folder]msiexec.exe"
+                Arguments="/x [ProductCode]" />
+      <RemoveFolder Id="RemoveProductMenu" On="uninstall" />
+      <RegistryValue Root="HKCU"
+                     Key="Software\TallyWhatsApp"
+                     Name="ShortcutsInstalled"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+    </Component>
+  </Package>
+</Wix>

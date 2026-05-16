@@ -1,0 +1,16 @@
+# Configuration files with secrets
+config.json
+.env
+
+# Database and session storage
+store/
+*.db
+
+# Build artifacts
+whatsapp-bridge
+whatsapp-bridge.exe
+*.exe
+
+# OS-specific files
+.DS_Store
+Thumbs.db

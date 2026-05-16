@@ -1,0 +1,36 @@
+{
+  "_comment": "Production Configuration Example",
+  "_description": "This is a production-ready configuration with security-focused settings",
+  
+  "server": {
+    "port": 8080,
+    "host": "0.0.0.0"
+  },
+  
+  "whatsapp": {
+    "_comment": "Longer timeout for production stability",
+    "timeout_seconds": 120,
+    "auto_reconnect": true
+  },
+  
+  "files": {
+    "_comment": "Restrict file types and size for security",
+    "max_size_mb": 50,
+    "allowed_types": [
+      "pdf",
+      "jpg",
+      "png"
+    ]
+  },
+  
+  "logging": {
+    "_comment": "Use warn in production to reduce log volume",
+    "level": "warn"
+  },
+  
+  "retry": {
+    "_comment": "More retries with longer timeout for reliability",
+    "max_retries": 5,
+    "timeout_seconds": 60
+  }
+}

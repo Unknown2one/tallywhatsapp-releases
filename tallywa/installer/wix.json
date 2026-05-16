@@ -1,0 +1,8 @@
+{
+  "//": "wix.json — references for `wix extension add` so CI doesn't have to know the version pins. Run before `wix build`.",
+  "extensions": [
+    "WixToolset.Util.wixext/4.0.5",
+    "WixToolset.Firewall.wixext/4.0.5",
+    "WixToolset.UI.wixext/4.0.5"
+  ]
+}

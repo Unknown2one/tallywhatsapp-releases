@@ -1,0 +1,26 @@
+;; ============================================================
+;; TallyWhatsApp loader — declares the COM interface that the
+;; voucher-send hooks invoke. Loaded by tally.ini before any
+;; file that references TallyWASend.
+;;
+;; Generated and managed by the TallyWhatsApp installer. Do not
+;; edit by hand — the installer rewrites this file on update.
+;; ============================================================
+
+;; --- COM Interface: TallyWASend -----------------------------
+;;   p1 = comma-separated 12-digit phone numbers (with country code)
+;;   p2 = absolute file path to the PDF
+;;   p3 = caption / message body
+;;   p4 = voucher type ("sale" | "receipt" | "ledger")
+;;   p5 = stable voucher GUID, used as idempotency key
+;; -------------------------------------------------------------
+[COM Interface:TallyWASend]
+    Project   : TallyWhatsappsender
+    Class     : WhatsAppSender
+    Interface : SendVoucher
+    Parameter : p1 : String : In
+    Parameter : p2 : String : In
+    Parameter : p3 : String : In
+    Parameter : p4 : String : In
+    Parameter : p5 : String : In
+    Return    : String

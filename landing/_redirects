@@ -1,0 +1,6 @@
+# Cloudflare Pages redirects.
+# /download → latest MSI from GitHub Releases (set up the Release first, then update this URL).
+# Replace OWNER/REPO with your actual GitHub repo path before deploying.
+
+/download   https://github.com/OWNER/REPO/releases/latest/download/TallyWhatsApp.msi   302
+/buy        https://rzp.io/rzp/tallywhatsapp                                            302

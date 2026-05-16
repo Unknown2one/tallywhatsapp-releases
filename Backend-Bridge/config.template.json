@@ -1,0 +1,31 @@
+{
+  "server": {
+    "port": 8080,
+    "host": "localhost"
+  },
+  "whatsapp": {
+    "timeout_seconds": 60,
+    "auto_reconnect": true
+  },
+  "files": {
+    "max_size_mb": 100,
+    "allowed_types": [
+      "pdf",
+      "jpg",
+      "png",
+      "jpeg",
+      "doc",
+      "docx",
+      "txt",
+      "csv",
+      "xlsx"
+    ]
+  },
+  "logging": {
+    "level": "info"
+  },
+  "retry": {
+    "max_retries": 3,
+    "timeout_seconds": 30
+  }
+}

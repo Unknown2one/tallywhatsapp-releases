@@ -1,0 +1,146 @@
+[#Form: Sales Color]
+	On : Form Accept : Yes : CALL : SendVoucherWhatsapp
+
+[#Form: Receipt Color]
+	On : Form Accept : Yes : CALL : SendVoucherWhatsapp
+
+[#Form: Ledger Vouchers]
+	Add : Button : Send Ledger Whatsapp Btn
+
+[Button: Send Ledger Whatsapp Btn]
+	Key    : Alt + J
+	Title  : Send Ledger WA
+	Action : Call : SendLedgerWhatsapp
+	Mode   : Display
+
+[Function: SendVoucherWhatsapp]
+
+	Variable: PrintFileName    :String
+	Variable: Contacts         :String
+	Variable: Exportedfilepath :String
+	Variable: ActualParty      :String
+	Variable: PartyAmount      :Amount
+
+	Local Formula:SafeVchNo:$$StringFindAndReplace:($$StringFindAndReplace:$VoucherNumber:"/":"-"):"\":"-"
+	Local Formula:PartyBal: $ClosingBalance:Ledger:##ActualParty
+	Local Formula:BalStr: IF $$IsEmpty:@PartyBal THEN "0.00" ELSE $$String:@PartyBal
+	Local Formula:IsReceiptType: $$IsEqual:$VoucherTypeName:"Receipt Book" OR $$IsEqual:$VoucherTypeName:"Receipt"
+	Local Formula:VoucherAmtStr: $$String:##PartyAmount
+	Local Formula:VoucherStr: IF @IsReceiptType THEN "Receipt No. " ELSE "Sales Invoice No. "
+	Local Formula:FilePrefix: IF @IsReceiptType THEN "Receipt_" ELSE "Sales_"
+	Local Formula:VoucherTypeTag: IF @IsReceiptType THEN "receipt" ELSE "sale"
+	Local Formula:LocalMsgtitle: "Namaste! Aapka " + @VoucherStr + $VoucherNumber + " dated " + $$String:$Date + " attach kiya hai. Voucher amount " + @VoucherAmtStr + " hai. Aapka outstanding balance " + @BalStr + " hai. Dhanyavaad!"
+	Local Formula:LocalContacts: IF $$IsEmpty:($LedgerMobile:Ledger:##ActualParty) THEN "" ELSE "91" + ($LedgerMobile:Ledger:##ActualParty) + ","
+
+	00   : SET : ActualParty : $PartyLedgerName
+	01   : SET : PartyAmount : 0
+	02   : WALK COLLECTION : All Ledger Entries
+	03   :    If : $LedgerName = ##ActualParty
+	04   :        SET : PartyAmount : $Amount
+	05   :    End If
+	06   :    If : $$IsEmpty:##ActualParty AND NOT $$IsEmpty:($LedgerMobile:Ledger:$LedgerName)
+	07   :        SET : ActualParty : $LedgerName
+	08   :        SET : PartyAmount : $Amount
+	09   :    End If
+	10   : END WALK
+	11   : If : $$IsEmpty:##ActualParty
+	12   :    Msg Box:"Info": "Party ledger not identified"
+	13   :    Return
+	14   : End If
+
+	15   : Query Box:"Do you want to Whatsapp the voucher?":Yes:No
+	16   : If:$$LastResult
+	17   :    If: NOT $$IsDirectory:"TallyWhatsapp"
+	18   :        Make Dir:"TallyWhatsapp"
+	19   :    End If
+	20   :    SET : Contacts :@LocalContacts
+	21   :    If:$$IsEmpty:##Contacts
+	22   :        Msg Box:"Info": "Empty mobile numbers"
+	23   :        Return
+	24   :    End If
+	25   :    Set: SVBrowserWidth : 210
+	26   :    Set: SVBrowserHeight : 297
+	27   :    Set: SVIsPortrait : Yes
+	28   :    SET : PrintFileName : "TallyWhatsapp\" + @FilePrefix + @SafeVchNo
+	29   :    SET : SVExportFormat : $$SysName:PDF
+	30   :    SET : SVPrintFileName : $$MakeExportName:##PrintFileName:##SVExportFormat
+	31   :    SET : SVOpenFileAfterExport : No
+	32   :    EXPORT REPORT : . : Yes : Yes
+	33   :    SET : Exportedfilepath : $$GetFileFullPath:##SVPrintFileName
+	34   :    If: $$IsCOMInterfaceInvokable:WhatsappEngine
+	35   :        Exec COM Interface:WhatsappEngine:##Contacts:##Exportedfilepath:@LocalMsgtitle:@@ChromeBinaryPath:@VoucherTypeTag
+	36   :        Msg Box:"Status":$$LastResult
+	37   :    Else
+	38   :        Msg Box:"Info":"COM Interface is not invokable or\n DLL is not registered"
+	39   :    End If
+	40   : End If
+	41   : Return
+
+[Function: SendLedgerWhatsapp]
+
+	Variable: PrintFileName    :String
+	Variable: Contacts         :String
+	Variable: Exportedfilepath :String
+	Variable: ActualParty      :String
+
+	Local Formula:SafeLedgerName:$$StringFindAndReplace:($$StringFindAndReplace:##ActualParty:"/":"-"):"\":"-"
+	Local Formula:LedgerBal: $ClosingBalance:Ledger:##ActualParty
+	Local Formula:LedgerBalStr: IF $$IsEmpty:@LedgerBal THEN "0.00" ELSE $$String:@LedgerBal
+	Local Formula:VoucherTypeTag: "ledger"
+	Local Formula:LocalMsgtitle: "Namaste! Aapka ledger report attach kiya hai for " + ##ActualParty + ". Current closing balance " + @LedgerBalStr + " hai. Dhanyavaad!"
+	Local Formula:LocalContacts: IF $$IsEmpty:($LedgerMobile:Ledger:##ActualParty) THEN "" ELSE "91" + ($LedgerMobile:Ledger:##ActualParty) + ","
+
+	00   : SET : ActualParty : ##SVLedgerName
+	01   : If : $$IsEmpty:##ActualParty
+	02   :    SET : ActualParty : ##LedgerName
+	03   : End If
+	04   : If : $$IsEmpty:##ActualParty
+	05   :    SET : ActualParty : $Name
+	06   : End If
+	07   : If : $$IsEmpty:##ActualParty
+	08   :    Msg Box:"Info":"Ledger name not found in current report context. Please open Ledger Vouchers for a single party ledger and try again."
+	09   :    Return
+	10   : End If
+	11   : Query Box:"Do you want to Whatsapp the ledger report for " + ##ActualParty + "?":Yes:No
+	12   : If:$$LastResult
+	13   :    If: NOT $$IsDirectory:"TallyWhatsapp"
+	14   :        Make Dir:"TallyWhatsapp"
+	15   :    End If
+	16   :    SET : Contacts :@LocalContacts
+	17   :    If:$$IsEmpty:##Contacts
+	18   :        Msg Box:"Info": "Empty mobile numbers for " + ##ActualParty
+	19   :        Return
+	20   :    End If
+	21   :    Set: SVBrowserWidth : 210
+	22   :    Set: SVBrowserHeight : 297
+	23   :    Set: SVIsPortrait : Yes
+	24   :    SET : PrintFileName : "TallyWhatsapp\Ledger_" + @SafeLedgerName
+	25   :    SET : SVExportFormat : $$SysName:PDF
+	26   :    SET : SVPrintFileName : $$MakeExportName:##PrintFileName:##SVExportFormat
+	27   :    SET : SVOpenFileAfterExport : No
+	28   :    EXPORT REPORT : . : Yes : Yes
+	29   :    SET : Exportedfilepath : $$GetFileFullPath:##SVPrintFileName
+	30   :    If: $$IsCOMInterfaceInvokable:WhatsappEngine
+	31   :        Exec COM Interface:WhatsappEngine:##Contacts:##Exportedfilepath:@LocalMsgtitle:@@ChromeBinaryPath:@VoucherTypeTag
+	32   :        Msg Box:"Status":$$LastResult
+	33   :    Else
+	34   :        Msg Box:"Info":"COM Interface is not invokable or\n DLL is not registered"
+	35   :    End If
+	36   : End If
+	37   : Return
+
+[COM Interface:WhatsappEngine]
+	Project:TallyWhatsappsender
+	Class:WhatsAppSender
+	Interface:InitProcessWithType
+	Parameter:p1:String:In
+	Parameter:p2:String:In
+	Parameter:p3:String:In
+	Parameter:p4:String:In
+	Parameter:p5:String:In
+	Return: String
+
+[System:Formulae]
+	ChromeBinaryPath : "C:\Program Files\Google\Chrome\Application\chrome.exe"
+
+

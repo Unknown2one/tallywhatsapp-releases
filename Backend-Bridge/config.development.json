@@ -1,0 +1,43 @@
+{
+  "_comment": "Development Configuration Example",
+  "_description": "Verbose logging and relaxed settings for development",
+  
+  "server": {
+    "port": 3000,
+    "host": "localhost"
+  },
+  
+  "whatsapp": {
+    "timeout_seconds": 60,
+    "auto_reconnect": true
+  },
+  
+  "files": {
+    "_comment": "Allow more file types and larger sizes in development",
+    "max_size_mb": 200,
+    "allowed_types": [
+      "pdf",
+      "jpg",
+      "png",
+      "jpeg",
+      "doc",
+      "docx",
+      "txt",
+      "csv",
+      "xlsx",
+      "zip",
+      "rar"
+    ]
+  },
+  
+  "logging": {
+    "_comment": "Debug level for detailed development logs",
+    "level": "debug"
+  },
+  
+  "retry": {
+    "_comment": "Fewer retries with shorter timeout for faster feedback",
+    "max_retries": 1,
+    "timeout_seconds": 10
+  }
+}

@@ -1,0 +1,67 @@
+# ---------------------------------------------
+# 1. IGNORE EVERYTHING IN THE ROOT FOLDER FIRST
+# ---------------------------------------------
+/*
+
+# ---------------------------------------------
+# 2. ALLOW ONLY THE ESSENTIAL FOLDERS AND FILES
+# ---------------------------------------------
+!/.gitignore
+!/README.md
+!/Tally-TDL/
+!/Tally-COM-Interface/
+!/Backend-Bridge/
+!/Build-Scripts/
+!/tallywa/
+!/landing/
+
+# ---------------------------------------------
+# 3. INSIDE ESSENTIAL FOLDERS, IGNORE JUNK (Binaries/DBs)
+# ---------------------------------------------
+bin/
+obj/
+Binary/
+.vs/
+.idea/
+vendor/
+
+# Go build outputs
+tallywa/installer/build/
+*.wixobj
+*.wixpdb
+
+# Go files
+whatsapp-session.db*
+whatsapp-session.json
+
+# Tally outputs
+TallyWhatsapp/
+*.pdf
+
+# Code-signing material — must never enter the repo
+*.pfx
+*.p12
+*.snk
+*.key
+*.pem
+
+# Runtime / local secrets
+.env
+.env.*
+license.dat
+**/credentials*.json
+
+# Windows binaries (We only push source code, not the built DLLs)
+*.dll
+*.exe
+*.pdb
+*.msi
+
+# Logs / DBs
+*.log
+outbox.db
+session/
+
+# Node (landing-page tooling, never deployed)
+node_modules/
+package-lock.json

@@ -1,0 +1,386 @@
+;***************************************************************;
+;****  Elegant A5 Landscape Receipt — TallyPrime TDL v4.0  ***;
+;****  Page : A5 Landscape (210 mm × 148 mm)               ***;
+;****                                                       ***;
+;****  FIXES OVER v3:                                       ***;
+;****  - Removed Background colors (don't render in print) ***;
+;****  - Removed sub-Part column layout (always stacks)    ***;
+;****  - Uses Fields + RightFields for left-right layout   ***;
+;****  - Uses Border: Thin Box for amount panel            ***;
+;****  - All layout via single Parts + Lines + Fields      ***;
+;***************************************************************;
+
+;; ============================================================
+;; STYLE DEFINITIONS  (Font = Tahoma throughout)
+;; ============================================================
+
+[Style : RL Co Name]            ;; Company name — largest, bold
+Font   : Tahoma
+Height : 13
+Bold   : Yes
+
+[Style : RL Co Addr]            ;; Address lines under company name
+Font   : Tahoma
+Height : 8
+
+[Style : RL Title]              ;; "RECEIPT VOUCHER" strip text
+Font   : Tahoma
+Height : 10
+Bold   : Yes
+
+[Style : RL Meta Lbl]           ;; "Receipt No." / "Date" captions
+Font   : Tahoma
+Height : 8
+
+[Style : RL Meta Val]           ;; Actual receipt number and date
+Font   : Tahoma
+Height : 10
+Bold   : Yes
+
+[Style : RL Row Lbl]            ;; Body row labels (muted prompts)
+Font   : Tahoma
+Height : 8
+
+[Style : RL Row Val]            ;; Body row values (bold data)
+Font   : Tahoma
+Height : 9
+Bold   : Yes
+
+[Style : RL Amt Lbl]            ;; "AMOUNT (INR)" caption inside box
+Font   : Tahoma
+Height : 8
+Bold   : Yes
+
+[Style : RL Amt Fig]            ;; Large amount figure
+Font   : Tahoma
+Height : 16
+Bold   : Yes
+
+[Style : RL Note]               ;; Footer note — small italic
+Font   : Tahoma
+Height : 7
+
+[Style : RL Sig Lbl]            ;; Signature role label
+Font   : Tahoma
+Height : 8
+
+[Style : RL Sig Name]           ;; Designation text
+Font   : Tahoma
+Height : 8
+Bold   : Yes
+
+;; ============================================================
+;; HOOK INTO TALLY'S DEFAULT RECEIPT FORM
+;; ============================================================
+[#Form: Receipt Color]
+Delete         : Print
+Add            : Print : RCPT LS v4
+PrintAfterSave : ##PPRCTPrintAfterSave OR ##PRCTPrintAfterSav
+
+;; ============================================================
+;; REPORT
+;; ============================================================
+[Report : RCPT LS v4]
+Object         : Voucher
+PrintSet       : Report Title : "Receipt Voucher"
+Filtered       : Yes
+Print          : VCHPrintConfigure
+Empty          : (NOT ##PRCTPrintEnabled) OR (NOT ##PRCTPrintAfterSave AND $$InAcceptMode) OR $$IsEmpty:$VoucherChequeName
+
+;; ============================================================
+;; FORM — 210 mm wide (A5 Landscape)
+;; NOTE: Set your PRINTER paper size to A5 Landscape manually.
+;;       TDL Width controls content layout, not paper selection.
+;; ============================================================
+[Form : RCPT LS v4]
+Parts      : RL Co Hdr, RL Title Bar, RL Meta Row, RL Body, RL Amt Box, RL Foot
+Width      : 210 mms
+Space Top  : 8 mms
+Space Left : 8 mms
+Space Right: 8 mms
+
+;; ============================================================
+;; PART 1 — COMPANY HEADER
+;;   Company name centred on its own line.
+;;   Address lines repeated, also centred.
+;;   Thin bottom border acts as a visual divider.
+;; ============================================================
+[Part : RL Co Hdr]
+Lines          : RL Co Name Line, RL Co Addr Line
+Repeat         : RL Co Addr Line : Company Address
+HorizontalAlign: Centre
+Border         : Thin Bottom
+SpaceBottom    : 4 mms
+
+[Line : RL Co Name Line]
+Fields         : RL Fld CoName
+SpaceBottom    : 2 mms
+
+[Field : RL Fld CoName]
+Set as         : ##SVCurrentCompany
+Style          : RL Co Name
+Align          : Centre
+FullWidth      : Yes
+
+[Line : RL Co Addr Line]
+Fields         : RL Fld CoAddr
+
+[Field : RL Fld CoAddr]
+Set as         : $Address
+Style          : RL Co Addr
+Align          : Centre
+FullWidth      : Yes
+
+;; ============================================================
+;; PART 2 — TITLE STRIP
+;;   "RECEIPT VOUCHER" centred, thin box border to frame it.
+;; ============================================================
+[Part : RL Title Bar]
+Lines          : RL Title Line
+HorizontalAlign: Centre
+Border         : Thin Box
+SpaceTop       : 3 mms
+SpaceBottom    : 3 mms
+
+[Line : RL Title Line]
+Fields         : RL Fld Title
+SpaceTop       : 2 mms
+SpaceBottom    : 2 mms
+
+[Field : RL Fld Title]
+Info           : "RECEIPT VOUCHER"
+Style          : RL Title
+Align          : Centre
+FullWidth      : Yes
+
+;; ============================================================
+;; PART 3 — META ROW (Receipt No. left | Date right)
+;;   Single Line: left Fields = No label+value,
+;;   RightFields = Date label+value.
+;;   Two sub-lines: top = captions, bottom = values.
+;; ============================================================
+[Part : RL Meta Row]
+Lines          : RL Meta Lbl Line, RL Meta Val Line
+Border         : Thin Bottom
+SpaceTop       : 3 mms
+SpaceBottom    : 3 mms
+
+;; Caption row: "Receipt No." left, "Date" right
+[Line : RL Meta Lbl Line]
+Fields         : RL Lbl No
+RightFields    : RL Lbl Date
+
+[Field : RL Lbl No]
+Info           : "Receipt No."
+Style          : RL Meta Lbl
+Align          : Left
+Width          : 90 mms
+
+[Field : RL Lbl Date]
+Info           : "Date"
+Style          : RL Meta Lbl
+Align          : Right
+Width          : 90 mms
+
+;; Value row: actual number left, actual date right
+[Line : RL Meta Val Line]
+Fields         : RL Val No
+RightFields    : RL Val Date
+SpaceBottom    : 2 mms
+
+[Field : RL Val No]
+Set as         : $VoucherNumber
+Style          : RL Meta Val
+Align          : Left
+Width          : 90 mms
+
+[Field : RL Val Date]
+Set as         : $$String:$Date:UniversalDate
+Style          : RL Meta Val
+Align          : Right
+Width          : 90 mms
+
+;; ============================================================
+;; PART 4 — BODY (Party & Payment Details)
+;;   Each row: 45 mm label on LEFT, value fills rest on RIGHT.
+;;   Party address repeats below party name.
+;; ============================================================
+[Part : RL Body]
+Lines          : RL Payer Row, RL PAddr Row, RL Words Row, RL Towards Row, RL Mode Row
+Repeat         : RL PAddr Row : Party Address
+Border         : Thin Bottom
+SpaceTop       : 5 mms
+SpaceBottom    : 5 mms
+
+;; Row: Received From
+[Line : RL Payer Row]
+Fields         : RL Lbl Payer, RL Val Payer
+SpaceBottom    : 3 mms
+
+[Field : RL Lbl Payer]
+Info           : "Received From"
+Style          : RL Row Lbl
+Width          : 45 mms
+Align          : Left
+
+[Field : RL Val Payer]
+Set as         : $LedgerName
+Style          : RL Row Val
+FullWidth      : Yes
+
+;; Row: Party address (repeated)
+[Line : RL PAddr Row]
+Fields         : RL Lbl PAddr, RL Val PAddr
+SpaceBottom    : 1 mms
+
+[Field : RL Lbl PAddr]
+Info           : " "
+Width          : 45 mms
+
+[Field : RL Val PAddr]
+Set as         : $Address
+Style          : RL Row Lbl
+FullWidth      : Yes
+
+;; Row: Sum of Rupees (Amount in words)
+[Line : RL Words Row]
+Fields         : RL Lbl Words, RL Val Words
+SpaceTop       : 4 mms
+SpaceBottom    : 3 mms
+
+[Field : RL Lbl Words]
+Info           : "Sum of Rupees"
+Style          : RL Row Lbl
+Width          : 45 mms
+Align          : Left
+
+[Field : RL Val Words]
+Set as         : $$InWords:#RLAmtFld + " Only"
+Style          : RL Row Val
+Lines          : 0
+FullWidth      : Yes
+
+;; Row: Towards / Narration
+[Line : RL Towards Row]
+Fields         : RL Lbl Towards, RL Val Towards
+SpaceBottom    : 3 mms
+
+[Field : RL Lbl Towards]
+Info           : "Towards"
+Style          : RL Row Lbl
+Width          : 45 mms
+Align          : Left
+
+[Field : RL Val Towards]
+Set as         : $Narration
+Style          : RL Row Lbl
+Lines          : 0
+FullWidth      : Yes
+
+;; Row: Payment Mode
+[Line : RL Mode Row]
+Fields         : RL Lbl Mode, RL Val Mode
+
+[Field : RL Lbl Mode]
+Info           : "Payment Mode"
+Style          : RL Row Lbl
+Width          : 45 mms
+Align          : Left
+
+[Field : RL Val Mode]
+Info           : "Cash  /  Cheque  /  D.D.  /  Fund Transfer"
+Style          : RL Row Lbl
+FullWidth      : Yes
+
+;; ============================================================
+;; PART 5 — AMOUNT BOX
+;;   Thin Box border frames the panel.
+;;   "AMOUNT (INR)" caption left, large figure right.
+;;   #RLAmtFld is referenced by $$InWords in Part 4 above.
+;; ============================================================
+[Part : RL Amt Box]
+Lines          : RL Amt Line
+Border         : Thin Box
+SpaceTop       : 7 mms
+SpaceBottom    : 7 mms
+
+[Line : RL Amt Line]
+Fields         : RL Amt Lbl Fld
+RightFields    : RLAmtFld
+SpaceTop       : 4 mms
+SpaceBottom    : 4 mms
+
+[Field : RL Amt Lbl Fld]
+Info           : "AMOUNT  (INR)"
+Style          : RL Amt Lbl
+Width          : 70 mms
+Align          : Left
+SpaceLeft      : 5 mms
+
+[Field : RLAmtFld]             ;; Named so $$InWords above can reference via #RLAmtFld
+Use            : Amount Base Field
+Set as         : $$CollectionField:$Amount:1:AllLedgerEntries
+Style          : RL Amt Fig
+Align          : Right
+Width          : 100 mms
+SpaceRight     : 5 mms
+
+;; ============================================================
+;; PART 6 — FOOTER
+;;   Note line, then signature line pair.
+;;   Thin top border acts as the footer separator.
+;; ============================================================
+[Part : RL Foot]
+Lines          : RL Note Line, RL Sig Lbl Line, RL Sig Name Line
+Border         : Thin Top
+SpaceTop       : 3 mms
+SpaceBottom    : 5 mms
+
+[Line : RL Note Line]
+Fields         : RL Note Fld
+SpaceBottom    : 6 mms
+
+[Field : RL Note Fld]
+Info           : "* Cheques are subject to realization."
+Style          : RL Note
+FullWidth      : Yes
+
+;; Signature caption row: "Prepared By" left, company name right
+[Line : RL Sig Lbl Line]
+Fields         : RL Sig Lbl Left
+RightFields    : RL Sig Lbl Right
+
+[Field : RL Sig Lbl Left]
+Info           : "Prepared By"
+Style          : RL Sig Lbl
+Width          : 90 mms
+Align          : Left
+
+[Field : RL Sig Lbl Right]
+Set as         : "For  " + ##SVCurrentCompany
+Style          : RL Sig Lbl
+Width          : 90 mms
+Align          : Right
+
+;; Signature name row: designation left, designation right
+;; SpaceTop provides the blank line for physical signatures
+[Line : RL Sig Name Line]
+Fields         : RL Sig Name Left
+RightFields    : RL Sig Name Right
+SpaceTop       : 16 mms
+
+[Field : RL Sig Name Left]
+Info           : "( Accountant )"
+Style          : RL Sig Name
+Width          : 90 mms
+Align          : Left
+
+[Field : RL Sig Name Right]
+Info           : "( Authorised Signatory )"
+Style          : RL Sig Name
+Width          : 90 mms
+Align          : Right
+
+;***************************************************************;
+;*************  End of A5 Landscape Receipt TDL  ***************;
+;***************************************************************;
