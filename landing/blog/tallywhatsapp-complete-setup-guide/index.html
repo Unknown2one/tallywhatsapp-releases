@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete TallyWhatsApp Setup Guide: Install to First Invoice</title>
+<meta name="description" content="Step-by-step TallyWhatsApp setup guide for TallyPrime. Install, pair WhatsApp, verify TDL hooks, send your first invoice — full walkthrough with screenshots.">
+<link rel="canonical" href="https://tallywhatsapp.variantstudio.in/blog/tallywhatsapp-complete-setup-guide/">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://tallywhatsapp.variantstudio.in/blog/tallywhatsapp-complete-setup-guide/">
+<meta property="og:title" content="Complete TallyWhatsApp Setup Guide: Install to First Invoice">
+<meta property="og:description" content="Step-by-step TallyWhatsApp setup guide. Install, pair WhatsApp, verify TDL hooks, send your first invoice — with screenshots.">
+<meta property="og:image" content="https://tallywhatsapp.variantstudio.in/Pictures/Screenshot%202026-05-17%20235850.png">
+<meta property="og:locale" content="en_IN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Complete TallyWhatsApp Setup Guide: Install to First Invoice">
+<meta name="twitter:description" content="Full TallyPrime WhatsApp setup walkthrough — install, pair, verify, send.">
+<meta name="twitter:image" content="https://tallywhatsapp.variantstudio.in/Pictures/Screenshot%202026-05-17%20235850.png">
+
+<meta name="theme-color" content="#25D366">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="../style.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Complete TallyWhatsApp Setup Guide: From Install to Your First WhatsApp Invoice",
+  "description": "Step-by-step TallyWhatsApp setup guide for TallyPrime. Install, pair WhatsApp, verify TDL hooks, send your first invoice.",
+  "image": "https://tallywhatsapp.variantstudio.in/Pictures/Screenshot%202026-05-17%20235850.png",
+  "datePublished": "2026-05-18",
+  "dateModified": "2026-05-18",
+  "author": {"@type": "Organization", "name": "TallyWhatsApp Team"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Variant Studio",
+    "logo": {"@type": "ImageObject", "url": "https://tallywhatsapp.variantstudio.in/favicon.svg"}
+  },
+  "mainEntityOfPage": "https://tallywhatsapp.variantstudio.in/blog/tallywhatsapp-complete-setup-guide/"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Set up TallyWhatsApp end to end",
+  "totalTime": "PT8M",
+  "estimatedCost": {"@type": "MonetaryAmount", "currency": "INR", "value": "299"},
+  "tool": ["TallyPrime 4.x or newer", "TallyWhatsApp MSI installer", "WhatsApp on a smartphone", "Activation key (TWA-XXXX-XXXX-XXXX)"],
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "Buy and download", "text": "Pay ₹299 on the website. Receive a TWA-XXXX-XXXX-XXXX key by email. Download the MSI from the same page or the /download link."},
+    {"@type": "HowToStep", "position": 2, "name": "Install the MSI", "text": "Double-click the installer. The connector service registers itself, the COM bridge installs, three TDL files land in C:\\Program Files\\TallyWhatsApp\\TDL, and tally.ini is patched automatically."},
+    {"@type": "HowToStep", "position": 3, "name": "Activate the license", "text": "Open the dashboard from the system tray and paste the TWA-XXXX-XXXX-XXXX key. Activation completes offline — no phone-home."},
+    {"@type": "HowToStep", "position": 4, "name": "Pair WhatsApp", "text": "On the dashboard, scan the QR code with the WhatsApp app on your phone. Same flow as WhatsApp Web. Pair once, runs forever."},
+    {"@type": "HowToStep", "position": 5, "name": "Verify TDL hooks loaded", "text": "Open TallyPrime, go to F1 → TDL & Add-On → TDL Configuration and check that _loader, sales_send, receipt_send and ledger_send are all set to Yes."},
+    {"@type": "HowToStep", "position": 6, "name": "Send your first invoice", "text": "Open a sales voucher in TallyPrime. Press Alt+J or save the voucher. Confirm Yes on the prompt. The PDF is queued and delivered to the customer's WhatsApp within seconds."},
+    {"@type": "HowToStep", "position": 7, "name": "Track delivery", "text": "Switch to the Activity Log on the dashboard to see every send with status, recipient and a Resend button."}
+  ]
+}
+</script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a href="/" class="brand" aria-label="TallyWhatsApp home">
+      <span class="brand-mark">T</span>
+      <span class="brand-name">Tally<span>WhatsApp</span></span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="/#features">Features</a>
+      <a href="/#how">How it works</a>
+      <a href="/blog/">Blog</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <a href="/#pricing" class="btn btn-primary btn-sm">Buy ₹299</a>
+    </nav>
+  </div>
+</header>
+
+<main class="article-wrap">
+  <article class="article container">
+
+    <p class="article-meta">
+      <span>Setup Guide</span>
+      <span>18 May 2026</span>
+      <span>9 min read</span>
+    </p>
+
+    <h1>Complete TallyWhatsApp Setup Guide: From Install to Your First WhatsApp Invoice</h1>
+    <p class="article-lead">
+      This is the end-to-end <strong>TallyWhatsApp setup guide</strong>: install, activate, pair WhatsApp,
+      verify the TDL hooks, send a real sales invoice, and watch it land on the customer's phone.
+      Every step has a screenshot from a working install. Time to first delivered invoice — about eight minutes.
+    </p>
+
+    <figure class="article-hero">
+      <img src="../../Pictures/Screenshot%202026-05-17%20235850.png" alt="TallyWhatsApp v1.0.9 dashboard showing the WhatsApp pairing QR code, license activated state and three sent messages">
+      <figcaption style="text-align:center;font-size:0.85rem;color:var(--ink-400);margin-top:8px;">The TallyWhatsApp dashboard — what a healthy install looks like.</figcaption>
+    </figure>
+
+    <h2>Before you start</h2>
+    <p>Three things you need on the same PC where you run TallyPrime:</p>
+    <ul>
+      <li><strong>TallyPrime 4.x or newer.</strong> Tally.ERP 9 isn't supported.</li>
+      <li><strong>Windows 10 or 11.</strong> The connector is a Windows service plus a tray app.</li>
+      <li><strong>WhatsApp on your phone.</strong> Same handset you'd use for WhatsApp Web.</li>
+    </ul>
+    <p>
+      You'll also want about ten minutes. Most of that is waiting for TallyPrime to restart — the
+      install itself is under a minute.
+    </p>
+
+    <h2>Step 1 — Buy and download</h2>
+    <p>
+      Head to <a href="https://tallywhatsapp.variantstudio.in/">tallywhatsapp.variantstudio.in</a> and
+      click <em>Buy lifetime · ₹299</em>. Razorpay handles the payment. Within a minute or two of
+      success, you'll get an email with your activation key in the format
+      <code>TWA-XXXX-XXXX-XXXX</code> and a download link.
+    </p>
+    <p>
+      You can also grab the latest MSI directly at
+      <a href="/download">tallywhatsapp.variantstudio.in/download</a> — the URL always redirects to the
+      newest release on GitHub. Save the file as <code>TallyWhatsApp.msi</code>.
+    </p>
+
+    <h2>Step 2 — Install the MSI</h2>
+    <p>
+      Double-click <code>TallyWhatsApp.msi</code>. The installer is signed and asks for elevation
+      (UAC prompt) because it needs to register a Windows service. Click <em>Yes</em>.
+    </p>
+    <p>What happens during the install:</p>
+    <ul>
+      <li>A Windows service called <strong>TallyWhatsAppConnector</strong> is registered and started.</li>
+      <li>The C# COM bridge (<code>TallyWhatsappsender.dll</code>) is registered with regasm in both 32-bit and 64-bit views so TallyPrime can find it.</li>
+      <li>Three TDL files (<code>sales_send.tdl</code>, <code>receipt_send.tdl</code>, <code>ledger_send.tdl</code>) plus a loader land in <code>C:\Program Files\TallyWhatsApp\TDL</code>.</li>
+      <li>Every <code>tally.ini</code> on the machine is patched with <code>User TDL = Yes</code> and a <code>TDL =</code> line for each of our four files.</li>
+      <li>Start Menu and Desktop shortcuts are created with the brand icon.</li>
+    </ul>
+    <p>
+      After install, a tray icon appears near the clock. Click it — the dashboard opens in your default
+      browser at <code>http://127.0.0.1</code> on a random local port.
+    </p>
+
+    <h2>Step 3 — Activate your license</h2>
+    <p>
+      On the dashboard, find the <em>License</em> panel. Paste your <code>TWA-XXXX-XXXX-XXXX</code> key
+      and click <em>Activate</em>. The connector verifies the Ed25519 signature offline — no phone-home —
+      and the panel flips to <em>Activated · pro</em>.
+    </p>
+    <p>
+      Each license includes three device activations. If you ever need to move to a new PC, just paste
+      the same key there. If you exhaust all three, email <a href="mailto:admin@variantstudio.in">admin@variantstudio.in</a>
+      and we'll reset the count.
+    </p>
+
+    <h2>Step 4 — Pair WhatsApp</h2>
+    <p>
+      The <em>WhatsApp</em> panel on the dashboard shows a QR code. On your phone:
+    </p>
+    <ol class="how-to-steps">
+      <li>Open WhatsApp.</li>
+      <li>Tap <strong>Settings → Linked Devices → Link a Device</strong>.</li>
+      <li>Point the camera at the QR code on the dashboard.</li>
+      <li>Wait a couple of seconds. The dashboard's WhatsApp panel should switch to <em>Connected</em> and show your phone number.</li>
+    </ol>
+    <p>
+      This is the standard WhatsApp Multi-Device pairing — the same flow you'd use for WhatsApp Web.
+      Your phone stays the source of truth; TallyWhatsApp is just a linked device.
+    </p>
+
+    <h2>Step 5 — Verify TDL hooks loaded inside TallyPrime</h2>
+    <p>
+      Restart TallyPrime so it re-reads the patched <code>tally.ini</code>. Then press <strong>F1</strong>
+      → <strong>TDL &amp; Add-On</strong> → <strong>TDL Configuration</strong>. You should see four files
+      from <code>C:\Program Files\TallyWhatsApp\TDL</code>, all set to <em>Yes</em>:
+    </p>
+
+    <figure class="article-hero">
+      <img src="../../Pictures/Screenshot%202026-05-18%20000131.png" alt="TallyPrime TDL Configuration screen showing _loader.tdl, sales_send.tdl, receipt_send.tdl and ledger_send.tdl all loaded">
+      <figcaption style="text-align:center;font-size:0.85rem;color:var(--ink-400);margin-top:8px;">All four TDL files loaded — the connector is wired into Tally.</figcaption>
+    </figure>
+
+    <p>
+      If any of them shows <em>Not loaded (Error)</em>, the most common cause is that TallyPrime is
+      still running an old session. Close TallyPrime fully (check the system tray for a hidden Tally
+      icon) and reopen it. If the error persists, see the troubleshooting section at the end.
+    </p>
+
+    <h2>Step 6 — Send your first sales invoice</h2>
+    <p>
+      Open any sales voucher in TallyPrime and look at the right-side function-key panel. You should
+      see a new entry: <strong>J: Send WhatsApp</strong>.
+    </p>
+
+    <figure class="article-hero">
+      <img src="../../Pictures/Screenshot%202026-05-17%20234858.png" alt="TallyPrime sales voucher with the J: Send WhatsApp button highlighted in green in the function key panel">
+      <figcaption style="text-align:center;font-size:0.85rem;color:var(--ink-400);margin-top:8px;">The Send WhatsApp button — Alt+J or click — appears on every sales voucher.</figcaption>
+    </figure>
+
+    <p>
+      Enter (or open) a sales voucher for a customer whose ledger has a phone number on file. Save the
+      voucher with <kbd>Ctrl+A</kbd> as you normally would, or press <kbd>Alt+J</kbd> to fire the WhatsApp
+      flow without saving.
+    </p>
+
+    <h2>Step 7 — Confirm the send</h2>
+    <p>
+      A small TallyPrime dialog appears asking <em>Send this sales invoice on WhatsApp?</em> with
+      Yes/No buttons. Press <strong>Y</strong>.
+    </p>
+
+    <figure class="article-hero">
+      <img src="../../Pictures/Screenshot%202026-05-17%20234936.png" alt="TallyPrime dialog asking Send this sales invoice on WhatsApp with Yes and No options">
+      <figcaption style="text-align:center;font-size:0.85rem;color:var(--ink-400);margin-top:8px;">The single confirmation point — Yes means send.</figcaption>
+    </figure>
+
+    <p>
+      This Yes/No prompt is the only confirmation. Press Yes and you've explicitly told the system to
+      send. Pressing Yes again later — even on the same invoice — is treated as a fresh send. That's
+      the design: the user confirms, the system delivers.
+    </p>
+
+    <h2>Step 8 — Watch it queue</h2>
+    <p>
+      TallyPrime exports the voucher as a PDF, hands it to the connector through the COM bridge, and
+      you see a brief confirmation: <em>Queued. WhatsApp delivery runs in the background. Press any
+      key to continue.</em>
+    </p>
+
+    <figure class="article-hero">
+      <img src="../../Pictures/Screenshot%202026-05-17%20235316.png" alt="TallyPrime overlay confirming Queued. WhatsApp delivery runs in the background. Press any key to continue.">
+      <figcaption style="text-align:center;font-size:0.85rem;color:var(--ink-400);margin-top:8px;">Queued — control returns to you instantly while delivery runs asynchronously.</figcaption>
+    </figure>
+
+    <p>
+      The connector now picks the item off its durable BoltDB-backed outbox, talks to WhatsApp's
+      Multi-Device protocol, and uploads the PDF. If WhatsApp is down or your network drops, the
+      queue retries with exponential backoff — you don't lose the message.
+    </p>
+
+    <h2>Step 9 — Customer receives the PDF</h2>
+    <p>
+      Within a few seconds, your customer's WhatsApp shows the invoice PDF with a friendly
+      Hindi-English caption: <em>Namaste! Aapka Sales Invoice No. … attach kiya hai. Invoice amount …
+      hai. Aapka outstanding balance … hai. Dhanyavaad!</em>
+    </p>
+
+    <figure class="article-hero">
+      <img src="../../Pictures/Screenshot%202026-05-17%20235624.png" alt="WhatsApp chat on a phone showing three received PDFs from TallyWhatsApp with Hindi-English captions">
+      <figcaption style="text-align:center;font-size:0.85rem;color:var(--ink-400);margin-top:8px;">Customer's view — PDFs land on WhatsApp with the auto-generated caption.</figcaption>
+    </figure>
+
+    <p>
+      The same flow works on receipt vouchers (also Alt+J) and on the Ledger Vouchers report
+      (Alt+L for the <em>Send Ledger WA</em> button). For more on each voucher type, see
+      <a href="/blog/send-tally-invoices-whatsapp-automatically/">how to send Tally invoices on WhatsApp automatically</a>.
+    </p>
+
+    <h2>Step 10 — Track everything in the activity log</h2>
+    <p>
+      Back on the dashboard, switch to the <em>Activity Log</em>. Every send appears there with a
+      status badge — Sent, Sending, Pending, Failed — the recipient number, voucher type and a
+      Resend button.
+    </p>
+
+    <figure class="article-hero">
+      <img src="../../Pictures/Screenshot%202026-05-17%20235955.png" alt="TallyWhatsApp Activity log table listing three sent vouchers (ledger, receipt, sale) with status badges and Resend buttons">
+      <figcaption style="text-align:center;font-size:0.85rem;color:var(--ink-400);margin-top:8px;">The Activity Log — full audit trail of every voucher sent.</figcaption>
+    </figure>
+
+    <p>
+      Resend is per-row. Click it and the voucher re-enters the queue. There's no daily quota and no
+      cooldown except for receipt vouchers, which are spaced about 90 seconds apart so end-of-day
+      batches don't trip WhatsApp's anti-burst limits.
+    </p>
+
+    <h2>Troubleshooting: QR stuck on "Preparing"</h2>
+    <p>
+      The most common first-install hiccup. The dashboard says <em>Preparing QR…</em> but no code ever
+      appears.
+    </p>
+
+    <figure class="article-hero">
+      <img src="../../Pictures/Preparing%20QR%20Error.png" alt="TallyWhatsApp dashboard showing the QR panel stuck on Preparing QR with a spinner">
+      <figcaption style="text-align:center;font-size:0.85rem;color:var(--ink-400);margin-top:8px;">If this is what you see for more than 30 seconds, run the fix below.</figcaption>
+    </figure>
+
+    <p>
+      Open <strong>PowerShell as Administrator</strong> (right-click the Start menu → <em>Terminal
+      (Admin)</em> on Windows 11, or <em>Windows PowerShell (Admin)</em> on Windows 10) and run:
+    </p>
+    <pre><code>Restart-Service TallyWhatsAppConnector</code></pre>
+    <p>
+      Refresh the dashboard. A fresh QR code appears within a few seconds. This usually only happens
+      after a Windows sleep/wake or a forced shutdown that left the connector mid-state.
+    </p>
+
+    <h2>What's next</h2>
+    <p>
+      That's the full <strong>TallyPrime WhatsApp setup</strong>. The connector now lives in your
+      system tray, restarts itself if it ever crashes, and updates daily via a scheduled task that
+      pulls the latest MSI signature. You don't have to think about it again.
+    </p>
+    <p>
+      If you want to understand the TDL plumbing under the hood, read the
+      <a href="/blog/tally-tdl-tutorial-send-whatsapp/">Tally TDL tutorial</a>. If you want to know
+      where else to apply the same automation thinking, the
+      <a href="/blog/tally-automation-checklist/">Tally automation checklist</a> is where most teams
+      go next.
+    </p>
+
+    <div class="article-cta">
+      <h3>Get TallyWhatsApp running today</h3>
+      <p>₹299 one-time. Three activations included. Data stays on your PC. Eight minutes to your first
+        delivered invoice.</p>
+      <a href="/#pricing" class="btn btn-primary">Buy lifetime · ₹299</a>
+      <a href="/download" class="btn btn-ghost">Download installer</a>
+    </div>
+
+    <div class="article-prev-next">
+      <a href="/blog/tally-customization-comparison/">← TDL vs add-ons vs cloud</a>
+      <a href="/blog/">All posts →</a>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="container footer-grid">
+    <div>
+      <a href="/" class="brand">
+        <span class="brand-mark">T</span>
+        <span class="brand-name">Tally<span>WhatsApp</span></span>
+      </a>
+      <p class="footer-tag">A product by Variant Studio. Made in India.</p>
+    </div>
+    <div class="footer-links">
+      <a href="/#features">Features</a>
+      <a href="/#how">How it works</a>
+      <a href="/blog/">Blog</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+    </div>
+    <div class="footer-contact">
+      <div>Support</div>
+      <a href="mailto:admin@variantstudio.in">admin@variantstudio.in</a>
+      <p class="footer-mini">We're not a chatbot. Real people, replies within a working day.</p>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© 2026 Variant Studio · variantstudio.in</span>
+    <span>WhatsApp is a trademark of Meta Platforms. TallyPrime is a trademark of Tally Solutions. We are not affiliated.</span>
+  </div>
+</footer>
+
+</body>
+</html>

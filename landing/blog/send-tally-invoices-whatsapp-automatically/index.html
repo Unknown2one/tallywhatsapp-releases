@@ -67,7 +67,7 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {"@type": "Question", "name": "Will my WhatsApp account get banned?", "acceptedAnswer": {"@type": "Answer", "text": "TallyWhatsApp uses the official WhatsApp Multi-Device protocol. Your account is treated as a linked device, identical to WhatsApp Web."}},
+    {"@type": "Question", "name": "Will my WhatsApp account get banned?", "acceptedAnswer": {"@type": "Answer", "text": "TallyWhatsApp uses the official WhatsApp Multi-Device protocol — your account is treated as a linked device, identical to WhatsApp Web. The only real risk is WhatsApp's anti-spam system: blasting hundreds of invoices back-to-back can flag any account and trigger a ~24-hour temporary restriction. We auto-space receipt vouchers ~90s apart for this reason. Pace sales batches and you stay well below the threshold."}},
     {"@type": "Question", "name": "Can I resend the same invoice?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Every deliberate click of Send WhatsApp is treated as a fresh send. The Yes / No prompt is the user confirmation point."}},
     {"@type": "Question", "name": "Does it work with multiple companies?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The Send WhatsApp button appears in every company file TallyPrime opens — no per-company setup."}}
   ]
@@ -170,8 +170,12 @@
     <div class="article-faq">
       <details>
         <summary>Will my WhatsApp account get banned?</summary>
-        <p>No. TallyWhatsApp uses the official Multi-Device protocol — your account is treated as a
-          linked device exactly the way WhatsApp Web is. There is no scraping or policy bypass.</p>
+        <p>TallyWhatsApp uses the official Multi-Device protocol — your account is treated as a
+          linked device exactly the way WhatsApp Web is. There is no scraping or policy bypass. The
+          one real risk is WhatsApp's anti-spam system: sending hundreds of invoices back-to-back can
+          flag any account and trigger a ~24-hour temporary restriction. We auto-space receipt
+          vouchers about 90 seconds apart for this reason. Pace sales batches to customers who
+          expect them and you stay well below the threshold.</p>
       </details>
       <details>
         <summary>Can I resend the same invoice?</summary>

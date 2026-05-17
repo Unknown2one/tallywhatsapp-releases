@@ -11,6 +11,7 @@
 
 ## Blog
 
+- [Complete TallyWhatsApp Setup Guide: From Install to Your First WhatsApp Invoice](https://tallywhatsapp.variantstudio.in/blog/tallywhatsapp-complete-setup-guide/): full end-to-end walkthrough with screenshots — install MSI, activate license, pair WhatsApp, verify TDL hooks, send first invoice, track in activity log
 - [Tally TDL Tutorial: Add a Send-on-WhatsApp Button in 5 Minutes](https://tallywhatsapp.variantstudio.in/blog/tally-tdl-tutorial-send-whatsapp/): anatomy of a working TDL hook for TallyPrime, with the four pitfalls every author hits
 - [How to Send Tally Invoices on WhatsApp Automatically](https://tallywhatsapp.variantstudio.in/blog/send-tally-invoices-whatsapp-automatically/): step-by-step delivery flow for sales invoices, receipts and ledger statements
 - [Tally Automation: 6 Manual Tasks You Should Stop Doing Today](https://tallywhatsapp.variantstudio.in/blog/tally-automation-checklist/): checklist of the highest-leverage TallyPrime automations
