@@ -1,0 +1,32 @@
+# TallyWhatsApp
+
+> TallyWhatsApp is a Windows desktop app that adds a Send-on-WhatsApp button to TallyPrime sales, receipt and ledger vouchers. The connector runs entirely on the user's PC — no cloud relay, no third-party server, no subscription. ₹299 lifetime, three activations included.
+
+## Product
+
+- [Home](https://tallywhatsapp.variantstudio.in/): product overview, pricing, FAQ
+- [Buy](https://tallywhatsapp.variantstudio.in/#pricing): Razorpay payment page, ₹299 one-time
+- [Download](https://tallywhatsapp.variantstudio.in/download): latest MSI installer from GitHub Releases
+- [Thank You](https://tallywhatsapp.variantstudio.in/thank-you/): post-purchase setup guide
+
+## Blog
+
+- [Tally TDL Tutorial: Add a Send-on-WhatsApp Button in 5 Minutes](https://tallywhatsapp.variantstudio.in/blog/tally-tdl-tutorial-send-whatsapp/): anatomy of a working TDL hook for TallyPrime, with the four pitfalls every author hits
+- [How to Send Tally Invoices on WhatsApp Automatically](https://tallywhatsapp.variantstudio.in/blog/send-tally-invoices-whatsapp-automatically/): step-by-step delivery flow for sales invoices, receipts and ledger statements
+- [Tally Automation: 6 Manual Tasks You Should Stop Doing Today](https://tallywhatsapp.variantstudio.in/blog/tally-automation-checklist/): checklist of the highest-leverage TallyPrime automations
+- [WhatsApp Invoice Sharing: A GST-Compliant Guide for Indian SMBs](https://tallywhatsapp.variantstudio.in/blog/whatsapp-invoice-gst-guide/): what the GST rules actually require for invoice delivery, and the privacy angle most articles miss
+- [Tally Customization on a Budget: TDL vs Add-Ons vs Cloud Tools](https://tallywhatsapp.variantstudio.in/blog/tally-customization-comparison/): when each path is the right answer
+
+## Key technical claims
+
+- Uses the official WhatsApp Multi-Device protocol (treated as a linked device, like WhatsApp Web)
+- Runs as a Windows service (TallyWhatsAppConnector) plus a system tray dashboard
+- Loopback-only HTTP API on 127.0.0.1, HMAC-signed with a per-install secret
+- License files signed with Ed25519 and verified offline — no phone-home for activation
+- Three TDL hooks ship in the MSI: sales_send.tdl, receipt_send.tdl, ledger_send.tdl
+- All voucher data, customer phone numbers and PDFs stay on the user's PC
+
+## Support
+
+- Email: admin@variantstudio.in
+- Stuck QR fix: open elevated PowerShell and run `Restart-Service TallyWhatsAppConnector`

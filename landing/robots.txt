@@ -1,4 +1,93 @@
+# TallyWhatsApp — robots.txt
+#
+# Open policy. We welcome traditional search engines AND AI training /
+# answer-engine crawlers. The User-agent: * rule covers everyone, but the
+# named bots below make the intent unambiguous so polite crawlers that
+# specifically check for their own name find an explicit Allow.
+
 User-agent: *
+Allow: /
+
+# ── OpenAI ──────────────────────────────────────────────────────────
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+# ── Anthropic ───────────────────────────────────────────────────────
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# ── Google AI (separate from Googlebot) ─────────────────────────────
+User-agent: Google-Extended
+Allow: /
+
+# ── Perplexity ──────────────────────────────────────────────────────
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+# ── Apple Intelligence ──────────────────────────────────────────────
+User-agent: Applebot-Extended
+Allow: /
+
+# ── Meta AI ─────────────────────────────────────────────────────────
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Meta-ExternalFetcher
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+# ── ByteDance / TikTok ──────────────────────────────────────────────
+User-agent: Bytespider
+Allow: /
+
+# ── Common Crawl (feeds many AI datasets) ──────────────────────────
+User-agent: CCBot
+Allow: /
+
+# ── Amazon Alexa / AI ───────────────────────────────────────────────
+User-agent: Amazonbot
+Allow: /
+
+# ── DuckDuckGo Assist ───────────────────────────────────────────────
+User-agent: DuckAssistBot
+Allow: /
+
+# ── You.com ─────────────────────────────────────────────────────────
+User-agent: YouBot
+Allow: /
+
+# ── Cohere ──────────────────────────────────────────────────────────
+User-agent: cohere-ai
+Allow: /
+
+# ── Other answer engines ────────────────────────────────────────────
+User-agent: Diffbot
+Allow: /
+
+User-agent: Timpibot
+Allow: /
+
+User-agent: ImagesiftBot
+Allow: /
+
+User-agent: Omgilibot
 Allow: /
 
 Sitemap: https://tallywhatsapp.variantstudio.in/sitemap.xml
