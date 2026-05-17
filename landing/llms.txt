@@ -6,8 +6,7 @@
 
 - [Home](https://tallywhatsapp.variantstudio.in/): product overview, pricing, FAQ
 - [Buy](https://tallywhatsapp.variantstudio.in/#pricing): Razorpay payment page, ₹299 one-time
-- [Download](https://tallywhatsapp.variantstudio.in/download): latest MSI installer from GitHub Releases
-- [Thank You](https://tallywhatsapp.variantstudio.in/thank-you/): post-purchase setup guide
+- [Thank You](https://tallywhatsapp.variantstudio.in/thank-you/): post-purchase setup guide with MSI download
 
 ## Blog
 

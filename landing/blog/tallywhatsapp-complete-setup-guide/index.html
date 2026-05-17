@@ -54,7 +54,7 @@
   "estimatedCost": {"@type": "MonetaryAmount", "currency": "INR", "value": "299"},
   "tool": ["TallyPrime 4.x or newer", "TallyWhatsApp MSI installer", "WhatsApp on a smartphone", "Activation key (TWA-XXXX-XXXX-XXXX)"],
   "step": [
-    {"@type": "HowToStep", "position": 1, "name": "Buy and download", "text": "Pay ₹299 on the website. Receive a TWA-XXXX-XXXX-XXXX key by email. Download the MSI from the same page or the /download link."},
+    {"@type": "HowToStep", "position": 1, "name": "Buy and download", "text": "Pay ₹299 on the website. Receive a TWA-XXXX-XXXX-XXXX key by email. Download the MSI from the thank-you page or the email."},
     {"@type": "HowToStep", "position": 2, "name": "Install the MSI", "text": "Double-click the installer. The connector service registers itself, the COM bridge installs, three TDL files land in C:\\Program Files\\TallyWhatsApp\\TDL, and tally.ini is patched automatically."},
     {"@type": "HowToStep", "position": 3, "name": "Activate the license", "text": "Open the dashboard from the system tray and paste the TWA-XXXX-XXXX-XXXX key. Activation completes offline — no phone-home."},
     {"@type": "HowToStep", "position": 4, "name": "Pair WhatsApp", "text": "On the dashboard, scan the QR code with the WhatsApp app on your phone. Same flow as WhatsApp Web. Pair once, runs forever."},
@@ -123,12 +123,9 @@
       Head to <a href="https://tallywhatsapp.variantstudio.in/">tallywhatsapp.variantstudio.in</a> and
       click <em>Buy lifetime · ₹299</em>. Razorpay handles the payment. Within a minute or two of
       success, you'll get an email with your activation key in the format
-      <code>TWA-XXXX-XXXX-XXXX</code> and a download link.
-    </p>
-    <p>
-      You can also grab the latest MSI directly at
-      <a href="/download">tallywhatsapp.variantstudio.in/download</a> — the URL always redirects to the
-      newest release on GitHub. Save the file as <code>TallyWhatsApp.msi</code>.
+      <code>TWA-XXXX-XXXX-XXXX</code> and a download link to the latest MSI. The thank-you page that
+      loads right after payment also has the download button — save the file as
+      <code>TallyWhatsApp.msi</code>.
     </p>
 
     <h2>Step 2 — Install the MSI</h2>
@@ -322,7 +319,6 @@
       <p>₹299 one-time. Three activations included. Data stays on your PC. Eight minutes to your first
         delivered invoice.</p>
       <a href="/#pricing" class="btn btn-primary">Buy lifetime · ₹299</a>
-      <a href="/download" class="btn btn-ghost">Download installer</a>
     </div>
 
     <div class="article-prev-next">
