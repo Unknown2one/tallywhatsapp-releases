@@ -90,6 +90,11 @@
       "@type": "Question",
       "name": "What happens when TallyPrime updates?",
       "acceptedAnswer": {"@type": "Answer", "text": "TallyWhatsApp self-heals on each restart and re-patches Tally if needed. The TDL contract is stable — Tally updates rarely break our integration."}
+    },
+    {
+      "@type": "Question",
+      "name": "Why is the QR stuck on Preparing?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Open PowerShell as Administrator and run Restart-Service TallyWhatsAppConnector. Refresh the dashboard — a fresh QR appears within a few seconds."}
     }
   ]
 }
@@ -108,6 +113,7 @@
     <nav aria-label="Primary">
       <a href="#features">Features</a>
       <a href="#how">How it works</a>
+      <a href="/blog/">Blog</a>
       <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
       <a href="#pricing" class="btn btn-primary btn-sm">Buy ₹299</a>
@@ -363,6 +369,10 @@
       <details>
         <summary>What happens when TallyPrime updates?</summary>
         <p>The connector self-heals on each service restart and re-patches Tally's <code>tally.ini</code> if needed. The underlying TDL contract is stable, so Tally updates rarely break us — and if they ever do, we ship an update within days.</p>
+      </details>
+      <details>
+        <summary>Why is the QR stuck on "Preparing"?</summary>
+        <p>Open PowerShell as Administrator and run <code>Restart-Service TallyWhatsAppConnector</code>. Refresh the dashboard — a fresh QR appears within a few seconds. This usually only happens after a Windows sleep/wake or a forced shutdown.</p>
       </details>
     </div>
   </div>

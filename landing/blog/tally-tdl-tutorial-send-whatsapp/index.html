@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tally TDL Tutorial: Send WhatsApp Button in 5 Minutes</title>
+<meta name="description" content="A working Tally TDL tutorial. Learn how a small TDL hook adds a Send WhatsApp button to TallyPrime sales, receipt and ledger vouchers.">
+<link rel="canonical" href="https://tallywhatsapp.variantstudio.in/blog/tally-tdl-tutorial-send-whatsapp/">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://tallywhatsapp.variantstudio.in/blog/tally-tdl-tutorial-send-whatsapp/">
+<meta property="og:title" content="Tally TDL Tutorial: Send WhatsApp Button in 5 Minutes">
+<meta property="og:description" content="A working Tally TDL tutorial. A small TDL hook adds a Send WhatsApp button to TallyPrime vouchers.">
+<meta property="og:image" content="https://tallywhatsapp.variantstudio.in/Pictures/Screenshot%202026-05-18%20000131.png">
+<meta property="og:locale" content="en_IN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tally TDL Tutorial: Send WhatsApp Button in 5 Minutes">
+<meta name="twitter:description" content="A working Tally TDL tutorial. Hook a TallyPrime form, add a button, call a function, ship.">
+<meta name="twitter:image" content="https://tallywhatsapp.variantstudio.in/Pictures/Screenshot%202026-05-18%20000131.png">
+
+<meta name="theme-color" content="#25D366">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="../style.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Tally TDL Tutorial: Add a Send-on-WhatsApp Button in 5 Minutes",
+  "description": "A working Tally TDL tutorial. Learn how a small TDL hook adds a Send WhatsApp button to TallyPrime sales, receipt and ledger vouchers.",
+  "image": "https://tallywhatsapp.variantstudio.in/Pictures/Screenshot%202026-05-18%20000131.png",
+  "datePublished": "2026-05-17",
+  "dateModified": "2026-05-17",
+  "author": {"@type": "Organization", "name": "TallyWhatsApp Team"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Variant Studio",
+    "logo": {"@type": "ImageObject", "url": "https://tallywhatsapp.variantstudio.in/favicon.svg"}
+  },
+  "mainEntityOfPage": "https://tallywhatsapp.variantstudio.in/blog/tally-tdl-tutorial-send-whatsapp/"
+}
+</script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a href="/" class="brand" aria-label="TallyWhatsApp home">
+      <span class="brand-mark">T</span>
+      <span class="brand-name">Tally<span>WhatsApp</span></span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="/#features">Features</a>
+      <a href="/#how">How it works</a>
+      <a href="/blog/">Blog</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <a href="/#pricing" class="btn btn-primary btn-sm">Buy ₹299</a>
+    </nav>
+  </div>
+</header>
+
+<main class="article-wrap">
+  <article class="article container">
+
+    <p class="article-meta">
+      <span>Tally TDL</span>
+      <span>17 May 2026</span>
+      <span>6 min read</span>
+    </p>
+
+    <h1>Tally TDL Tutorial: Add a Send-on-WhatsApp Button in 5 Minutes</h1>
+    <p class="article-lead">
+      The shortest path from a TallyPrime voucher to a customer's WhatsApp is a Tally TDL file.
+      One <code>[#Form]</code>, one button, one function — and the voucher leaves the screen.
+      Here is the working anatomy, with the pitfalls you'll hit on day one.
+    </p>
+
+    <figure class="article-hero">
+      <img src="../../Pictures/Screenshot%202026-05-18%20000131.png" alt="TallyPrime TDL Configuration screen showing TallyWhatsApp's loader, sales, receipt and ledger TDL files all loaded">
+    </figure>
+
+    <h2>What a Tally TDL actually is</h2>
+    <p>
+      Tally Definition Language is the scripting layer baked into TallyPrime. It is how every Tally screen,
+      report and voucher is described — and how third-party developers extend the product without forking it.
+      A TDL file is plain text, loaded at startup via <code>tally.ini</code>, and gets a chance to attach to
+      any form Tally renders.
+    </p>
+    <p>
+      For a Send-on-WhatsApp button, that's exactly the hook we need. Tally already exports a sales voucher
+      to PDF in two lines. The TDL just has to add a button, ask the user to confirm, run the export, and
+      hand the file off to something that can speak WhatsApp's protocol.
+    </p>
+
+    <h2>The minimal anatomy of a working hook</h2>
+    <p>Every voucher hook in <a href="https://tallywhatsapp.variantstudio.in/">TallyWhatsApp</a> follows the same shape:</p>
+    <pre><code>[#Form: Sales Color]
+    Add : Button : Send Sales WA Btn
+    On  : Form Accept : Yes : CALL : TallyWASendSales
+
+[Button: Send Sales WA Btn]
+    Key    : Alt + J
+    Title  : Send WhatsApp
+    Action : Call : TallyWASendSales
+
+[Function: TallyWASendSales]
+    ; ... export PDF, then hand off via COM ...</code></pre>
+    <p>
+      Three blocks, three jobs. <code>[#Form: Sales Color]</code> is the override hook — the
+      <code>#</code> means "modify the existing form, don't redefine it." Tally's voucher screens are all
+      named after their colour scheme; the form that ships with TallyPrime for sales entry is
+      <code>Sales Color</code>. <code>Receipt Color</code> for receipts, <code>Ledger Vouchers</code> for the
+      ledger statement — different names, same pattern.
+    </p>
+    <p>
+      The <code>Add : Button</code> line attaches a clickable button to the form. The
+      <code>On : Form Accept</code> line wires the same function to fire when the user saves the voucher,
+      so the prompt appears on every Save without the user pressing the button. That's how
+      <strong>Tally TDL</strong> turns a manual "send invoice" workflow into a one-keystroke habit.
+    </p>
+
+    <h2>Why a tiny COM bridge beats reinventing HTTP</h2>
+    <p>
+      TDL is great at describing forms. It is <em>not</em> great at speaking modern protocols. The trick
+      that makes the whole thing tractable is a single line:
+    </p>
+    <pre><code>Exec COM Interface:TallyWASend:##Contacts:##Path:##Msg:"sale":##VchGuid</code></pre>
+    <p>
+      That hands five strings to a registered COM object — the recipient list, the exported PDF path, the
+      caption, the voucher type, and an idempotency key. The TDL stays small. The
+      <a href="https://tallywhatsapp.variantstudio.in/">TallyWhatsApp connector</a> on the same PC picks
+      it up over local IPC and handles the actual WhatsApp send via the official Multi-Device protocol.
+      No HTTP plumbing inside Tally, no third-party server in the loop.
+    </p>
+
+    <h2>The four pitfalls every TDL author hits</h2>
+    <p>
+      We shipped versions 1.0.7 through 1.0.9 of TallyWhatsApp in two days fixing exactly these. If you
+      are writing your first <strong>Tally TDL</strong>, save yourself the loop:
+    </p>
+    <ul>
+      <li><strong>Alt+Q is not yours.</strong> It is TallyPrime's built-in Quit shortcut. Bind your button
+        to a free key — Alt+J for vouchers, Alt+L for ledger reports.</li>
+      <li><strong>No <code>;;</code> comments inside numbered step bodies.</strong> Tally's parser allows
+        them only outside function blocks. A comment at line <code>02</code> of your function will fail
+        the whole file with a T0008 error.</li>
+      <li><strong>Stable <code>$Guid</code> is also a trap.</strong> If you use it directly as the
+        idempotency key, the user can never resend the same voucher. Suffix it with
+        <code>$$Now</code> so every deliberate click is a fresh send.</li>
+      <li><strong>Forms named with overlay variants don't always exist.</strong> "DSP Ledger Vouchers"
+        looked like a real form. It is not. Hook the canonical form name only.</li>
+    </ul>
+
+    <h2>Where to go from here</h2>
+    <p>
+      If you want to ship the same idea without writing a line of <strong>Tally TDL</strong> yourself,
+      the easiest path is to install TallyWhatsApp — the MSI lays down three TDL files
+      (sales, receipt, ledger) and registers the COM bridge for you. ₹299 one-time, three activations,
+      data stays on your PC. If you want to write your own TDL, the four pitfalls above will get you most
+      of the way to a working build.
+    </p>
+    <p>
+      For the full delivery flow with screenshots, see
+      <a href="/blog/send-tally-invoices-whatsapp-automatically/">How to Send Tally Invoices on WhatsApp Automatically</a>.
+    </p>
+
+    <div class="article-cta">
+      <h3>Ship without writing TDL</h3>
+      <p>Install TallyWhatsApp on your PC and the three TDL hooks land themselves. Pay ₹299 once.</p>
+      <a href="/#pricing" class="btn btn-primary">Buy lifetime · ₹299</a>
+      <a href="/" class="btn btn-ghost">See how it works</a>
+    </div>
+
+    <div class="article-prev-next">
+      <span></span>
+      <a href="/blog/send-tally-invoices-whatsapp-automatically/">Next: Send Tally invoices on WhatsApp →</a>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="container footer-grid">
+    <div>
+      <a href="/" class="brand">
+        <span class="brand-mark">T</span>
+        <span class="brand-name">Tally<span>WhatsApp</span></span>
+      </a>
+      <p class="footer-tag">A product by Variant Studio. Made in India.</p>
+    </div>
+    <div class="footer-links">
+      <a href="/#features">Features</a>
+      <a href="/#how">How it works</a>
+      <a href="/blog/">Blog</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+    </div>
+    <div class="footer-contact">
+      <div>Support</div>
+      <a href="mailto:admin@variantstudio.in">admin@variantstudio.in</a>
+      <p class="footer-mini">We're not a chatbot. Real people, replies within a working day.</p>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© 2026 Variant Studio · variantstudio.in</span>
+    <span>WhatsApp is a trademark of Meta Platforms. TallyPrime is a trademark of Tally Solutions. We are not affiliated.</span>
+  </div>
+</footer>
+
+</body>
+</html>
