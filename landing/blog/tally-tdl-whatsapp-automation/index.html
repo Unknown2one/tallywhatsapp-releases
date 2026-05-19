@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tally WhatsApp Automation: One-Click Invoices with TDL</title>
+<meta name="description" content="What Tally TDL WhatsApp automation actually does — the 7-step flow, what's included, and what it costs. Honest guide from the team that built it.">
+<link rel="canonical" href="https://tallywhatsapp.variantstudio.in/blog/tally-tdl-whatsapp-automation/">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://tallywhatsapp.variantstudio.in/blog/tally-tdl-whatsapp-automation/">
+<meta property="og:title" content="Tally WhatsApp Automation: One-Click Invoices with TDL">
+<meta property="og:description" content="The 7-step flow that turns TallyPrime into a one-click WhatsApp invoicing tool — without third-party APIs.">
+<meta property="og:image" content="https://tallywhatsapp.variantstudio.in/Pictures/Screenshot%202026-05-17%20235316.png">
+<meta property="og:locale" content="en_IN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tally WhatsApp Automation: One-Click Invoices with TDL">
+<meta name="twitter:description" content="What Tally TDL WhatsApp automation actually does — the 7-step flow, the cost, and the limits.">
+<meta name="twitter:image" content="https://tallywhatsapp.variantstudio.in/Pictures/Screenshot%202026-05-17%20235316.png">
+
+<meta name="theme-color" content="#25D366">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="../style.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Tally WhatsApp Automation: Send Invoices in One Click with TDL",
+  "description": "What Tally TDL WhatsApp automation actually does — the 7-step flow, the cost, and the limits.",
+  "image": "https://tallywhatsapp.variantstudio.in/Pictures/Screenshot%202026-05-17%20235316.png",
+  "datePublished": "2026-05-19",
+  "dateModified": "2026-05-19",
+  "author": {"@type": "Organization", "name": "TallyWhatsApp Team"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Variant Studio",
+    "logo": {"@type": "ImageObject", "url": "https://tallywhatsapp.variantstudio.in/favicon.svg"}
+  },
+  "mainEntityOfPage": "https://tallywhatsapp.variantstudio.in/blog/tally-tdl-whatsapp-automation/"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Do I need WhatsApp Business API or a paid gateway?", "acceptedAnswer": {"@type": "Answer", "text": "No. TallyWhatsApp uses the official WhatsApp Multi-Device protocol — your existing personal or business number is paired exactly the way WhatsApp Web pairs. There is no per-message fee and no third-party API account."}},
+    {"@type": "Question", "name": "Does my customer need to install anything?", "acceptedAnswer": {"@type": "Answer", "text": "No. Customers receive a normal WhatsApp message with the invoice PDF attached. No portals, no logins, no apps."}},
+    {"@type": "Question", "name": "Which version of TallyPrime does this work with?", "acceptedAnswer": {"@type": "Answer", "text": "TallyPrime 4.x and newer, including 5.x. Both Silver and Gold editions, single and multi-company. Older versions are not supported."}},
+    {"@type": "Question", "name": "What if the customer's WhatsApp number changes?", "acceptedAnswer": {"@type": "Answer", "text": "TallyWhatsApp reads the mobile number directly from the party ledger at send time. Update the ledger once and every future invoice goes to the new number."}},
+    {"@type": "Question", "name": "Where does my invoice data go?", "acceptedAnswer": {"@type": "Answer", "text": "Nowhere. The connector runs entirely on your PC. Voucher data, customer numbers and PDFs never leave your machine. There is no cloud relay."}}
+  ]
+}
+</script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a href="/" class="brand" aria-label="TallyWhatsApp home">
+      <span class="brand-mark">T</span>
+      <span class="brand-name">Tally<span>WhatsApp</span></span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="/#features">Features</a>
+      <a href="/#how">How it works</a>
+      <a href="/blog/">Blog</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <a href="/#pricing" class="btn btn-primary btn-sm">Buy ₹299</a>
+    </nav>
+  </div>
+</header>
+
+<main class="article-wrap">
+  <article class="article container">
+
+    <p class="article-meta">
+      <span>Tally TDL · WhatsApp Automation</span>
+      <span>19 May 2026</span>
+      <span>7 min read</span>
+    </p>
+
+    <h1>Tally WhatsApp Automation: Send Invoices in One Click with TDL</h1>
+    <p class="article-lead">
+      Most TallyPrime users still dispatch invoices the same way: print to PDF, switch to WhatsApp Web,
+      search the customer, attach, type, send. Forty times a day. <strong>Tally TDL WhatsApp
+      automation</strong> collapses that ritual into a single keystroke — and it does it without a
+      monthly API bill or your data leaving the building. Here is what it actually is, the flow that
+      runs end to end, and where the limits sit.
+    </p>
+
+    <figure class="article-hero">
+      <img src="../../Pictures/Screenshot%202026-05-17%20235316.png" alt="TallyPrime showing the WhatsApp queued confirmation overlay seconds after a sales voucher is saved">
+    </figure>
+
+    <h2>The dispatch problem nobody costs out</h2>
+    <p>
+      Billing inside TallyPrime is fast — that's the whole point of the software. The slow part is what
+      happens after Save. Each manual WhatsApp dispatch eats roughly 90 seconds: open the browser, log
+      into WhatsApp Web, search the contact, download the PDF, attach, write a caption, send. At 40
+      invoices a day that's an hour gone. At 100 — standard for a mid-size distributor — it's nearly
+      three hours of repetitive work, and the kind of work where mistakes compound: wrong PDF to wrong
+      customer, wrong invoice number in the caption, payment delays because the buyer "never got the
+      bill". That's the gap <a href="https://tallywhatsapp.variantstudio.in/">TallyWhatsApp</a> closes.
+    </p>
+
+    <h2>What Tally TDL WhatsApp automation actually is</h2>
+    <p>
+      Tally Definition Language is the official customisation framework built into every copy of
+      TallyPrime. It's how Tally Solutions itself extends the product, and it's the right tool to add
+      a "Send WhatsApp" button to the Sales, Receipt and Ledger Vouchers screens. We covered the
+      anatomy of a working hook in <a href="/blog/tally-tdl-tutorial-send-whatsapp/">our Tally TDL
+      tutorial</a> — this post is about the automation that hangs off those hooks once they fire.
+    </p>
+    <p>
+      The TDL itself is small (under 200 lines, split across three files). The work happens in a
+      Windows service that ships with the same installer: it pairs once with WhatsApp using the
+      official <strong>Multi-Device protocol</strong> — your phone is the source of truth, the PC is a
+      linked device, identical to WhatsApp Web. There is no third-party API provider, no per-message
+      fee, no cloud relay.
+    </p>
+
+    <h2>The 7-step flow, end to end</h2>
+    <ol class="how-to-steps">
+      <li><strong>You save a sales voucher in TallyPrime.</strong> Press Ctrl+A as you always do.
+        The TDL hook intercepts the form's accept event.</li>
+      <li><strong>A confirmation prompt appears.</strong> A small Tally dialog asks <em>Send this
+        sales invoice on WhatsApp?</em> with Yes/No buttons. This is the user-confirmation point —
+        nothing leaves your PC until you press Y.</li>
+      <li><strong>Customer number is read from the party ledger.</strong> The TDL pulls the WhatsApp
+        number stored against the buyer's ledger. Update it once in Tally and every future invoice
+        uses the new number.</li>
+      <li><strong>Tally generates a GST-compliant PDF.</strong> Using your existing invoice
+        template — the same one you already print. No layout changes.</li>
+      <li><strong>The connector composes a Hindi-English caption.</strong> Invoice number, date,
+        amount and outstanding balance are dropped into a template you can edit. Reflects what most
+        Indian SMB customers actually expect to see.</li>
+      <li><strong>Multi-Device send fires.</strong> The PDF and caption ride out as a normal
+        WhatsApp message from your linked number. End-to-end encrypted, delivered through Meta's
+        infrastructure — exactly like WhatsApp Web.</li>
+      <li><strong>Customer's phone buzzes within seconds.</strong> The activity log inside the
+        TallyWhatsApp dashboard records the send with a timestamp for your audit trail.</li>
+    </ol>
+
+    <h2>What's included — and what isn't</h2>
+    <p>
+      A clear-eyed list, because most of the comparison content out there mixes features with
+      aspirations.
+    </p>
+    <ul>
+      <li><strong>Sales, Receipt and Ledger Voucher buttons.</strong> Three working TDL hooks ship
+        in the MSI: <code>sales_send.tdl</code>, <code>receipt_send.tdl</code>,
+        <code>ledger_send.tdl</code>.</li>
+      <li><strong>One-click resend.</strong> The same Yes/No prompt is the resend trigger — every
+        deliberate save is treated as a fresh send.</li>
+      <li><strong>Auto-pacing for receipt batches.</strong> Receipt vouchers are spaced ~90 seconds
+        apart automatically. WhatsApp's anti-spam system flags accounts that blast hundreds of
+        messages in a burst, so the connector throttles by default.</li>
+      <li><strong>Multi-company support.</strong> The button appears in every company file
+        TallyPrime opens. No per-company setup.</li>
+      <li><strong>Local activity log.</strong> Every send is recorded on your PC with status,
+        timestamp and ledger reference.</li>
+      <li><strong>Not included:</strong> bulk-blast tools, cold-outreach scripts, contact scraping,
+        marketing broadcast lists. Those break WhatsApp's rules and we don't ship them.</li>
+    </ul>
+
+    <h2>Where the time savings actually come from</h2>
+    <p>
+      Three places, in descending order of impact:
+    </p>
+    <ol>
+      <li><strong>The context switch.</strong> Not having to leave TallyPrime is the single biggest
+        win. Most accountants tab between Tally and a browser dozens of times a day; cutting that
+        loop saves more than the typing itself.</li>
+      <li><strong>The lookup.</strong> Reading the WhatsApp number from the ledger eliminates the
+        "search for the customer" step, which is also where most wrong-customer mistakes happen.</li>
+      <li><strong>The caption.</strong> A pre-templated caption with invoice number and outstanding
+        balance is more useful to the buyer than a hand-typed "PFA" — and faster to produce.</li>
+    </ol>
+    <p>
+      Together that turns a 90-second-per-invoice ritual into a 2-second confirmation. For a 40-bill
+      day, that's roughly an hour back. For a 100-bill day, closer to three.
+    </p>
+
+    <h2>Who this fits</h2>
+    <ul>
+      <li>Wholesale and retail distributors moving 30–500 invoices a day</li>
+      <li>FMCG, pharma, electronics and industrial dealers where invoice turnaround drives
+        delivery</li>
+      <li>CA firms running billing on behalf of multiple clients in TallyPrime</li>
+      <li>Any TallyPrime user still copying customer numbers into WhatsApp Web</li>
+    </ul>
+    <p>
+      If you need bespoke per-customer caption logic ("Marathi for some buyers, Hindi for others,
+      decided by ledger group") or workflows that touch Zoho or Razorpay too, we covered the
+      tradeoffs in our <a href="/blog/tally-customization-comparison/">TDL vs add-ons vs cloud
+      tools comparison</a>.
+    </p>
+
+    <h2>Common questions</h2>
+    <div class="article-faq">
+      <details>
+        <summary>Do I need WhatsApp Business API or a paid gateway?</summary>
+        <p>No. TallyWhatsApp uses the official WhatsApp Multi-Device protocol — your existing
+          personal or business number is paired exactly the way WhatsApp Web pairs. No third-party
+          API account, no per-message fee.</p>
+      </details>
+      <details>
+        <summary>Does my customer need to install anything?</summary>
+        <p>No. Customers receive a normal WhatsApp message with the invoice PDF attached, just
+          like any other WhatsApp message.</p>
+      </details>
+      <details>
+        <summary>Will my WhatsApp account get banned?</summary>
+        <p>The Multi-Device link itself is fully sanctioned by Meta — your account is treated as
+          having a linked device, identical to WhatsApp Web. The real risk is WhatsApp's anti-spam
+          system: blasting hundreds of invoices back-to-back can flag any account and trigger a
+          ~24-hour temporary restriction. The connector auto-spaces receipt vouchers ~90 seconds
+          apart for this reason. Pace sales batches and you stay well below the threshold.</p>
+      </details>
+      <details>
+        <summary>Which version of TallyPrime does this work with?</summary>
+        <p>TallyPrime 4.x and newer, including 5.x. Both Silver and Gold editions. Multi-company
+          support is built in.</p>
+      </details>
+      <details>
+        <summary>Where does my invoice data go?</summary>
+        <p>Nowhere. The connector runs entirely on your PC. Voucher data, customer numbers and
+          PDFs never leave your machine — there is no cloud relay and no telemetry.</p>
+      </details>
+    </div>
+
+    <div class="article-cta">
+      <h3>Stop typing customer numbers into WhatsApp Web</h3>
+      <p>Install once, pair once, send forever. ₹299 lifetime, three activations, data stays on
+        your PC.</p>
+      <a href="/#pricing" class="btn btn-primary">Buy lifetime · ₹299</a>
+    </div>
+
+    <div class="article-prev-next">
+      <a href="/blog/tally-tdl-tutorial-send-whatsapp/">← Tally TDL tutorial</a>
+      <a href="/blog/send-tally-invoices-whatsapp-automatically/">Next: 5-step delivery flow →</a>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="container footer-grid">
+    <div>
+      <a href="/" class="brand">
+        <span class="brand-mark">T</span>
+        <span class="brand-name">Tally<span>WhatsApp</span></span>
+      </a>
+      <p class="footer-tag">A product by Variant Studio. Made in India.</p>
+    </div>
+    <div class="footer-links">
+      <a href="/#features">Features</a>
+      <a href="/#how">How it works</a>
+      <a href="/blog/">Blog</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+    </div>
+    <div class="footer-contact">
+      <div>Support</div>
+      <a href="mailto:admin@variantstudio.in">admin@variantstudio.in</a>
+      <p class="footer-mini">We're not a chatbot. Real people, replies within a working day.</p>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© 2026 Variant Studio · variantstudio.in</span>
+    <span>WhatsApp is a trademark of Meta Platforms. TallyPrime is a trademark of Tally Solutions. We are not affiliated.</span>
+  </div>
+</footer>
+
+</body>
+</html>
