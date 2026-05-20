@@ -212,6 +212,32 @@ const dashboardHTML = `<!doctype html>
   .help li { margin: 4px 0; }
   .help .privnote { color: var(--ink-500); font-size: 12.5px; }
 
+  /* Reset-QR fallback block — surfaces when the skeleton is stuck */
+  .reset-hint {
+    margin-top: 14px; padding: 12px 14px;
+    background: var(--amber-50); border: 1px solid #f3dfa6;
+    border-radius: var(--radius-sm);
+  }
+  .reset-hint .reset-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+  }
+  .reset-hint details { margin-top: 10px; }
+  .reset-hint .cmd-block { margin-top: 8px; }
+  .reset-hint .cmd-label {
+    font-size: 11px; font-weight: 600; color: var(--ink-500);
+    text-transform: uppercase; letter-spacing: .05em;
+    margin: 8px 0 4px;
+  }
+  .reset-hint .cmd-row {
+    display: flex; gap: 8px; align-items: stretch;
+  }
+  .reset-hint .cmd-row pre {
+    flex: 1; margin: 0; font-size: 12px;
+    user-select: all;
+  }
+  .reset-hint .cmd-row button { flex: 0 0 auto; align-self: stretch; }
+
   /* Activity log */
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th { text-align: left; font-weight: 600; color: var(--ink-500);
@@ -319,6 +345,31 @@ const dashboardHTML = `<!doctype html>
             </ol>
             <div class="privnote">QR refreshes automatically. Messages stay on this PC — no cloud relay.</div>
           </div>
+        </div>
+
+        <div id="resetQrHint" class="reset-hint" hidden>
+          <div class="reset-row">
+            <div>
+              <div class="label">QR not appearing?</div>
+              <div class="hint">Restart the connector service. Your messages, license and pairings are unaffected.</div>
+            </div>
+            <button class="secondary" id="resetQrBtn" type="button">Reset QR</button>
+          </div>
+          <details>
+            <summary>Or run it yourself as Administrator</summary>
+            <div class="cmd-block">
+              <div class="cmd-label">PowerShell</div>
+              <div class="cmd-row">
+                <pre id="psResetCmd">Restart-Service TallyWhatsAppConnector</pre>
+                <button class="ghost tiny" type="button" data-copy="psResetCmd">Copy</button>
+              </div>
+              <div class="cmd-label">Command Prompt</div>
+              <div class="cmd-row">
+                <pre id="cmdResetCmd">net stop TallyWhatsAppConnector &amp;&amp; net start TallyWhatsAppConnector</pre>
+                <button class="ghost tiny" type="button" data-copy="cmdResetCmd">Copy</button>
+              </div>
+            </div>
+          </details>
         </div>
       </div>
 
@@ -434,6 +485,7 @@ async function refreshQR() {
       img.alt = "WhatsApp pairing QR";
       img.hidden = false;
       if (skel) skel.classList.add("hidden");
+      $("resetQrHint").hidden = true;
     } else if (!j.qr) {
       // Service is in awaiting_qr but whatsmeow hasn't pushed the first code
       // yet — keep the skeleton up, hide any stale image.
@@ -445,6 +497,21 @@ async function refreshQR() {
       if (skel) skel.classList.remove("hidden");
     }
   } catch (e) { /* ignore */ }
+}
+
+// Surface the Reset-QR fallback after a few seconds with no QR — that's
+// when users start emailing support. Hidden again as soon as a real QR
+// arrives or the state leaves awaiting_qr.
+let qrStuckTimer = null;
+function armResetHint() {
+  if (qrStuckTimer) return;
+  qrStuckTimer = setTimeout(() => {
+    if (!qrCache) $("resetQrHint").hidden = false;
+  }, 6000);
+}
+function disarmResetHint() {
+  if (qrStuckTimer) { clearTimeout(qrStuckTimer); qrStuckTimer = null; }
+  $("resetQrHint").hidden = true;
 }
 
 let currentFilter = "all";
@@ -640,6 +707,7 @@ function paint(s) {
       $("connectedPanel").hidden = false;
       $("logoutBtn").hidden = false;
       $("reconnectBtn").hidden = true;
+      disarmResetHint();
       break;
     case "awaiting_qr":
       setBadge($("waBadge"), "warn", "scan QR");
@@ -648,6 +716,7 @@ function paint(s) {
       $("qrPanel").hidden = false;
       $("connectedPanel").hidden = true;
       refreshQR();
+      if (!qrCache) armResetHint();
       break;
     case "logged_out":
       setBadge($("waBadge"), "err", "logged out");
@@ -657,6 +726,7 @@ function paint(s) {
       $("connectedPanel").hidden = false;
       $("logoutBtn").hidden = true;
       $("reconnectBtn").hidden = false;
+      disarmResetHint();
       break;
     case "connecting":
     case "disconnected":
@@ -665,10 +735,12 @@ function paint(s) {
       $("waPhone").hidden = true;
       $("qrPanel").hidden = true;
       $("connectedPanel").hidden = true;
+      disarmResetHint();
       break;
     default:
       setBadge($("waBadge"), "muted", st);
       $("waLabel").textContent = "Waiting…";
+      disarmResetHint();
   }
 
   // Top pill summarises everything.
@@ -791,6 +863,33 @@ async function hardRestart() {
 
 $("howBtn").addEventListener("click", () => {
   alert("Your activation key was emailed to you after purchase. It looks like TWA-XXXX-XXXX-XXXX. If you can't find it, check spam or email admin@variantstudio.in.");
+});
+
+// Reset QR — same path as the watchdog inside reconnectBtn, but exposed
+// directly so users don't have to wait through a soft-reconnect attempt
+// that's already failed for them.
+$("resetQrBtn").addEventListener("click", async () => {
+  if (!confirm("Restart the TallyWhatsApp service to reset the QR? The dashboard will reload in about 15 seconds.")) return;
+  $("resetQrBtn").disabled = true;
+  $("resetQrBtn").textContent = "Restarting…";
+  await hardRestart();
+});
+
+// Copy buttons next to the manual PowerShell / CMD commands.
+document.querySelectorAll("[data-copy]").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const target = $(btn.getAttribute("data-copy"));
+    if (!target) return;
+    const text = target.textContent.trim();
+    try {
+      await navigator.clipboard.writeText(text);
+      const orig = btn.textContent;
+      btn.textContent = "Copied";
+      setTimeout(() => { btn.textContent = orig; }, 1400);
+    } catch {
+      toast("Copy failed — select the text manually.");
+    }
+  });
 });
 
 $("refreshBtn").addEventListener("click", () => { refreshStatus(); refreshActivity(); });
